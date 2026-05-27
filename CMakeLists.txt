@@ -3,6 +3,9 @@ project(Projet_Sudoku C)
 
 set(CMAKE_C_STANDARD 11)
 
+set(CMAKE_C_FLAGS "-std=c11 -Wall -Wextra -Werror -pedantic -O2 -g")
+set(LDFLAGS "")
+
 include_directories(src/cli)
 include_directories(src/grid)
 include_directories(src/io)
@@ -24,3 +27,6 @@ add_executable(Projet_Sudoku
         src/solver/solver_internal.h
         src/sudoku_types/sudoku_types.h
         src/main.c)
+
+add_test(NAME valgrind_test
+        COMMAND valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./Projet_Sudoku)
