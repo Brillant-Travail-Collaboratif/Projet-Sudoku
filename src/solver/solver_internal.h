@@ -1,4 +1,0 @@
-#ifndef SOLVER_INTERNAL_H
-#define SOLVER_INTERNAL_H
-
-#endif /* SOLVER_INTERNAL_H */
