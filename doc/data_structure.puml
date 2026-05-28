@@ -1,0 +1,19 @@
+@startuml
+struct type_sudokutile {
+     char value
+     char possible[9]
+}
+
+struct type_grid {
+    typedef sudoku_tile grid[81]
+}
+
+struct type_subset {
+    typedef sudoku_tile **subset
+}
+
+type_subset --> type_sudokutile
+
+type_grid --> type_sudokutile
+
+@enduml
