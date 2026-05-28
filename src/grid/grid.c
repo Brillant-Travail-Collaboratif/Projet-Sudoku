@@ -1,2 +1,3 @@
 #include "grid.h"
-#include "grid_internal.h"
+
+void grid_placeholder(void) {}

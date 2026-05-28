@@ -1,3 +1,3 @@
 #include "solver.h"
-#include "solver_internal.h"
 
+void solver_placeholder(void) {}

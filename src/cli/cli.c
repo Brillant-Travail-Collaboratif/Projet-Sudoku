@@ -1,3 +1,3 @@
 #include "cli.h"
-#include "cli_internal.h"
 
+void cli_placeholder(void) {}
