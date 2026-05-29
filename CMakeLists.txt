@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.2)
+cmake_minimum_required(VERSION 3.31.6)
 project(Projet_Sudoku C)
 
 set(CMAKE_C_STANDARD 11)
@@ -19,6 +19,9 @@ add_executable(Projet_Sudoku
         src/grid/grid.c
         src/grid/grid.h
         src/grid/grid_internal.h
+        src/grid/tile.c
+        src/grid/tile.h
+        src/grid/tile_internal.h
         src/io/io.c
         src/io/io.h
         src/io/io_internal.h

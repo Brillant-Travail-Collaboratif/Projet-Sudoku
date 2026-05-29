@@ -3,6 +3,6 @@
 
 #include "type_sudokutile.h"
 
-typedef SudokuTile **subset;
+typedef SudokuTile **Subset;
 
 #endif /* TYPE_SUBSET_H */
