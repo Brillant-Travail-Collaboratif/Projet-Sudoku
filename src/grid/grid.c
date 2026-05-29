@@ -1,6 +1,4 @@
-#include "grid.h"
 #include "grid_internal.h"
-#include "tile.h"
 
 Grid createGrid() {
   Grid grid = malloc(sizeof(SudokuTile) * NUMBER_OF_TILE_IN_A_GRID);
@@ -25,37 +23,35 @@ void deleteGrid(Grid grid) {
   free(grid);
 }
 
-SudokuTile *gridGetTileXY(Grid grid, unsigned char x, unsigned char y) {
+char gridGetValueXY(Grid grid, unsigned char x, unsigned char y) {
+  if (grid == NULL || x > NUMBER_OF_TILE_IN_A_GRID / 2 ||
+      y > NUMBER_OF_TILE_IN_A_GRID / 2)
+    return 0;
+
+  return tileGetValue(&grid[(y - 1) * 9 + (x - 1)]);
+}
+
+char *gridGetPossibleXY(Grid grid, unsigned char x, unsigned char y) {
   if (grid == NULL || x > NUMBER_OF_TILE_IN_A_GRID / 2 ||
       y > NUMBER_OF_TILE_IN_A_GRID / 2)
     return NULL;
 
-  return &grid[(y - 1) * 9 + (x - 1)];
+  return tileGetPossible(&grid[(y - 1) * 9 + (x - 1)]);
 }
 
-char gridGetValueXY(Grid grid, unsigned char x, unsigned char y) {
-  SudokuTile *tile = gridGetTileXY(grid, x, y);
-  if (tile == NULL)
-    return NULL;
-  return tile->value;
+char gridSetValueXY(Grid grid, unsigned char x, unsigned char y, char value) {
+  if (grid == NULL || x > NUMBER_OF_TILE_IN_A_GRID / 2 ||
+      y > NUMBER_OF_TILE_IN_A_GRID / 2) {
+    return 1;
+  }
+
+  return tileSetValue(&grid[(y - 1) * 9 + (x - 1)], value);
 }
-
-char *gridGetPossibleXY(Grid grid, unsigned char x, unsigned char y) {
-  SudokuTile *tile = gridGetTileXY(grid, x, y);
-  if (tile == NULL)
-    return NULL;
-  return tile->possible;
-}
-
-char gridSetTileXY(Grid grid, unsigned char x, unsigned char y,
-                   SudokuTile *tile) {
-  if (grid == NULL || tile == NULL || x > NUMBER_OF_TILE_IN_A_GRID / 2 ||
-      y > NUMBER_OF_TILE_IN_A_GRID / 2)
-    return NULL;
-
-  grid[(y - 1) * 9 + (x - 1)] = *tile;
-}
-
-char gridSetValueXY(Grid grid, unsigned char x, unsigned char y, char value);
 char gridSetPossibleXY(Grid grid, unsigned char x, unsigned char y,
-                       char possible[NUMBER_OF_POSSIBLE]);
+                       char possible[NUMBER_OF_POSSIBLE]) {
+  if (grid == NULL || x > NUMBER_OF_TILE_IN_A_GRID / 2 ||
+      y > NUMBER_OF_TILE_IN_A_GRID / 2)
+    return 1;
+
+  return tileSetPossible(&grid[(y - 1) * 9 + (x - 1)], possible);
+}

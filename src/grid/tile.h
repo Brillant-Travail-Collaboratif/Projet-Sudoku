@@ -6,7 +6,10 @@
 SudokuTile *createTile(const char value,
                        const char possible[NUMBER_OF_POSSIBLE]);
 void deleteTile(SudokuTile *tile);
-char isValueValid(char value);
-char isPossibleValid(const char possible[NUMBER_OF_POSSIBLE]);
+
+char tileGetValue(SudokuTile *tile);
+char *tileGetPossible(SudokuTile *tile);
+char tileSetValue(SudokuTile *tile, char value);
+char tileSetPossible(SudokuTile *tile, char possible[NUMBER_OF_POSSIBLE]);
 
 #endif /* TILE_H */
