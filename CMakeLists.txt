@@ -25,9 +25,12 @@ add_executable(Projet_Sudoku
         src/io/io.c
         src/io/io.h
         src/io/io_internal.h
+        src/io/read.c
+        src/io/read.h
         src/solver/solver.c
         src/solver/solver.h
         src/solver/solver_internal.h
+        src/sudoku_types/sudoku_types.c
         src/sudoku_types/sudoku_types.h
         src/main.c)
 
