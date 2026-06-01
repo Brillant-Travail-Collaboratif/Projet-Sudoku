@@ -30,9 +30,10 @@ add_executable(Projet_Sudoku
         src/solver/solver.c
         src/solver/solver.h
         src/solver/solver_internal.h
-        src/sudoku_types/sudoku_types.c
-        src/sudoku_types/sudoku_types.h
-        src/main.c)
+        src/main.c
+        src/io/display.c
+        src/io/display.h
+        src/io/display.h)
 
 add_test(NAME valgrind_test
         COMMAND valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./Projet_Sudoku)
