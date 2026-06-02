@@ -48,11 +48,14 @@ Subset getSubsqSubset(Grid grid, int n) {
   if (subset == NULL)
     return NULL;
 
-  unsigned char boxCol = (n % BOX_SIDE) * BOX_SIDE;
+  /* Position du coin haut-gauche du sous-carre n. */
+  unsigned char boxRow = (n / BOX_SIDE) * BOX_SIDE; /* 0, 3 ou 6 */
+  unsigned char boxCol = (n % BOX_SIDE) * BOX_SIDE; /* 0, 3 ou 6 */
 
-  for (int i = 0; i < BOX_SIDE; i++) {
-    for (int j = 0; j < BOX_SIDE; j++) {
-      unsigned char row = n + i;
+  /* Parcours en ligne puis en colonne dans le sous-carre. */
+  for (unsigned char i = 0; i < BOX_SIDE; i++) {
+    for (unsigned char j = 0; j < BOX_SIDE; j++) {
+      unsigned char row = boxRow + i;
       unsigned char col = boxCol + j;
       subset[i * BOX_SIDE + j] = &grid[row * SUBSET_SIZE + col];
     }

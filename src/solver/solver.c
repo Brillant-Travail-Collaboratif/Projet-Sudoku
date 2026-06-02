@@ -38,11 +38,32 @@ char solveNakedSingles(Grid grid) {
   return modified;
 }
 
-char solve_hidden_singles_in_subset(Subset subset) {
+char solveHiddenSinglesInSubset(Subset subset) {
   if (subset == NULL)
     return 0;
 
-  return solve_hidden_singles_in_line(*subset);
+  unsigned char modified = 0;
+  for (char j = 1; j <= TILES_PER_LINE; j++) {
+    char alreadyPlaced = 0;
+    unsigned char count = 0;
+    unsigned char target = 0;
+
+    for (unsigned char i = 0; i < TILES_PER_LINE; i++) {
+      if (subset[i]->value == j) {
+        alreadyPlaced = 1;
+        break;
+      }
+      if (subset[i]->value == 0 && subset[i]->possible[j - 1]) {
+        count++;
+        target = i;
+      }
+    }
+    if (!alreadyPlaced && count == 1) {
+      fixTileValue(subset[target], j);
+      modified = 1;
+    }
+  }
+  return modified;
 }
 
 char solve_hidden_singles(Grid grid) {
@@ -59,7 +80,7 @@ char solve_hidden_singles(Grid grid) {
   unsigned char modified = 0;
 
   for (unsigned char i = 0; i < SUBSET_COUNT; i++) {
-    if (solve_hidden_singles_in_subset(all->subsets[i]) != 0)
+    if (solveHiddenSinglesInSubset(all->subsets[i]) != 0)
       modified = 1;
   }
 

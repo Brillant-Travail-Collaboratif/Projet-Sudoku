@@ -13,5 +13,6 @@
 unsigned char countCandidates(const SudokuTile *tile, char *candidate);
 void fixTileValue(SudokuTile *tile, char value);
 char removeCandidate(SudokuTile *tile, char value);
+char solveHiddenSinglesInSubset(Subset s);
 
 #endif /* SOLVER_INTERNAL_H */

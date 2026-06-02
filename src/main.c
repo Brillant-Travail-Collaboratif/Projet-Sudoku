@@ -10,14 +10,18 @@ int main(int argc, char **argv) {
   noecho();
   keypad(stdscr, TRUE);
 
-  Grid grid = loadSudokuFromFile("../doc/trivial_table_1.txt");
+  Grid grid = loadSudokuFromFile("../doc/intermediate_table_1.txt");
 
-  displayFinal(grid);
+  req_start_grid(grid);
 
-  clean_grid(grid);
-  solveNakedSingles(grid);
-  solve_hidden_singles(grid);
-  solveNakedSingles(grid);
+  unsigned char modified = 0;
+
+  do {
+    modified = clean_grid(grid);
+    modified |= solveNakedSingles(grid);
+    modified |= solve_hidden_singles(grid);
+    modified |= solveNakedSingles(grid);
+  } while (modified);
 
   displayFinal(grid);
 
