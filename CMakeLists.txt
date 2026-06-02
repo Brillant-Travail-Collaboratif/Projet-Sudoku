@@ -6,6 +6,8 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "-std=c11 -Wall -Wextra -Werror -pedantic -O2 -g")
 set(LDFLAGS "")
 
+find_package(Curses REQUIRED)
+
 include_directories(src/cli)
 include_directories(src/grid)
 include_directories(src/io)
@@ -30,10 +32,13 @@ add_executable(Projet_Sudoku
         src/solver/solver.c
         src/solver/solver.h
         src/solver/solver_internal.h
-        src/main.c
         src/io/display.c
         src/io/display.h
-        src/io/display.h)
+        src/io/display_internal.h
+        src/main.c)
+
+target_include_directories(Projet_Sudoku PRIVATE ${CURSES_INCLUDE_DIR})
+target_link_libraries(Projet_Sudoku PRIVATE ${CURSES_LIBRARIES})
 
 add_test(NAME valgrind_test
         COMMAND valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./Projet_Sudoku)

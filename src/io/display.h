@@ -6,6 +6,7 @@
 
 void displayFinal(Grid grid);
 void displayPossible(Grid grid);
+void req_start_grid(Grid grid);
 void dispSubset(Subset s);
 
 #endif /* DISPLAY_H */
