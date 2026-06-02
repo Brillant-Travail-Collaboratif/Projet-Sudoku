@@ -33,7 +33,9 @@ add_executable(Projet_Sudoku
         src/main.c
         src/io/display.c
         src/io/display.h
-        src/io/display.h)
+        src/io/display.h
+        src/subset/subset.c
+        src/subset/subset.h)
 
 add_test(NAME valgrind_test
         COMMAND valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./Projet_Sudoku)
