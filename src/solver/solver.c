@@ -134,3 +134,25 @@ char solve_hidden_singles_in_line(SudokuTile *line) {
   }
   return modified;
 }
+
+char clean_grid(Grid grid)
+{
+  if (grid == NULL)
+    return 0;
+
+  AllSubsets *all = malloc(sizeof(AllSubsets));
+  if (all == NULL)
+    return 0;
+
+  if (buildAllSubsets(grid, all) != 0)
+    return 0;
+
+  unsigned char modified = 0;
+
+  for (unsigned char i = 0; i < SUBSET_COUNT; i++) {
+    if (cleanSubset(all->subsets[i]) != 0)
+      modified = 1;
+  }
+
+  return modified;
+}
