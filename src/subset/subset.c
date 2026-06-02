@@ -1,9 +1,8 @@
 //
-// Created by Meike Rayan on 02/06/2026.
+// Created by Nicolas Gouaux on 02/06/2026.
 //
 
 #include "subset_internal.h"
-#include <stdlib.h>
 
 Subset allocateSubset(void) {
   return malloc(sizeof(SudokuTile *) * SUBSET_SIZE);
@@ -59,4 +58,32 @@ Subset getSubsqSubset(Grid grid, int n) {
   }
 
   return subset;
+}
+
+void freeAllSubsets(AllSubsets *all) {
+  if (all == NULL) return;
+  for (int i = 0; i < SUBSET_COUNT; i++) {
+    deleteSubset(all->subsets[i]);
+    all->subsets[i] = NULL;
+  }
+}
+
+char buildAllSubsets(Grid grid, AllSubsets *all) {
+  if (grid == NULL || all == NULL) return 1;
+
+  for (int i = 0; i < SUBSET_COUNT; i++) all->subsets[i] = NULL;
+
+  for (int n = 0; n < SUBSET_SIZE; n++) {
+    all->subsets[n]      = getLineSubset(grid, n);   /*  0..8  : lignes      */
+    all->subsets[9 + n]  = getColSubset(grid, n);    /*  9..17 : colonnes    */
+    all->subsets[18 + n] = getSubsqSubset(grid, n);  /* 18..26 : sous-carres */
+  }
+
+  for (int i = 0; i < SUBSET_COUNT; i++) {
+    if (all->subsets[i] == NULL) {
+      freeAllSubsets(all);
+      return 1;
+    }
+  }
+  return 0;
 }
