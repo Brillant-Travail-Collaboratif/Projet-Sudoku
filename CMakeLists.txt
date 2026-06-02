@@ -34,7 +34,10 @@ add_executable(Projet_Sudoku
         src/solver/solver_internal.h
         src/io/display.c
         src/io/display.h
+        src/io/display.h
         src/io/display_internal.h
+        src/subset/subset.c
+        src/subset/subset.h
         src/main.c)
 
 target_include_directories(Projet_Sudoku PRIVATE ${CURSES_INCLUDE_DIR})
