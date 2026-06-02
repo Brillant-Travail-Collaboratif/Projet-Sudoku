@@ -70,6 +70,7 @@ char cleanLine(SudokuTile *line) {
 }
 
 char solve_hidden_singles_in_line(SudokuTile *line) {
+  unsigned char modified = 0;
   for (unsigned char i = 1; i <= NUMBER_OF_POSSIBLE; i++) {
     unsigned char localisationOfCandidate = 0;
     for (unsigned char j = 0; j < NUMBER_OF_POSSIBLE; j++) {
@@ -81,7 +82,10 @@ char solve_hidden_singles_in_line(SudokuTile *line) {
         break;
       }
     }
-    if (localisationOfCandidate != 0)
+    if (localisationOfCandidate != 0) {
       tileSetValue(&line[localisationOfCandidate], i);
+      modified = 1;
+    }
   }
+  return modified;
 }
