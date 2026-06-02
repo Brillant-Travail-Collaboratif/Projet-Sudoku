@@ -69,6 +69,23 @@ char cleanLine(SudokuTile *line) {
   return modified;
 }
 
+
+char cleanSubset(Subset s) {
+  if (s == NULL) return 0;
+
+  char modified = 0;
+  for (unsigned char i = 0; i < TILES_PER_LINE; i++) {
+    const char value = s[i]->value;
+    if (value == 0) continue; /* case inconnue : rien a propager */
+
+    for (unsigned char j = 0; j < TILES_PER_LINE; j++) {
+      if (j == i) continue;
+      if (s[j]->value != 0) continue;
+      if (removeCandidate(s[j], value)) modified = 1;
+    }
+  }
+  return modified;
+}
 char solve_hidden_singles_in_line(SudokuTile *line) {
   unsigned char modified = 0;
   for (unsigned char i = 1; i <= NUMBER_OF_POSSIBLE; i++) {
