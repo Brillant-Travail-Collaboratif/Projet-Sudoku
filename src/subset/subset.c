@@ -22,16 +22,17 @@ Subset getLineSubset(Grid grid, int n) {
 }
 
 Subset getColSubset(Grid grid, int n) {
-    if (grid == NULL || n < 0 || n >= SUBSET_SIZE) return NULL;
+  if (grid == NULL || n < 0 || n >= SUBSET_SIZE)
+    return NULL;
 
-    Subset subset = allocateSubset();
-    if (subset == NULL) return NULL;
+  Subset subset = allocateSubset();
+  if (subset == NULL)
+    return NULL;
 
-    for (int k = 0; k < SUBSET_SIZE; k++)
-        subset[k] = &grid[k * SUBSET_SIZE + n];
+  for (int k = 0; k < SUBSET_SIZE; k++)
+    subset[k] = &grid[k * SUBSET_SIZE + n];
 
-    return subset;
-
+  return subset;
 }
 
 void deleteSubset(Subset subset) {
@@ -61,7 +62,8 @@ Subset getSubsqSubset(Grid grid, int n) {
 }
 
 void freeAllSubsets(AllSubsets *all) {
-  if (all == NULL) return;
+  if (all == NULL)
+    return;
   for (int i = 0; i < SUBSET_COUNT; i++) {
     deleteSubset(all->subsets[i]);
     all->subsets[i] = NULL;
@@ -69,14 +71,16 @@ void freeAllSubsets(AllSubsets *all) {
 }
 
 char buildAllSubsets(Grid grid, AllSubsets *all) {
-  if (grid == NULL || all == NULL) return 1;
+  if (grid == NULL || all == NULL)
+    return 1;
 
-  for (int i = 0; i < SUBSET_COUNT; i++) all->subsets[i] = NULL;
+  for (int i = 0; i < SUBSET_COUNT; i++)
+    all->subsets[i] = NULL;
 
   for (int n = 0; n < SUBSET_SIZE; n++) {
-    all->subsets[n]      = getLineSubset(grid, n);   /*  0..8  : lignes      */
-    all->subsets[9 + n]  = getColSubset(grid, n);    /*  9..17 : colonnes    */
-    all->subsets[18 + n] = getSubsqSubset(grid, n);  /* 18..26 : sous-carres */
+    all->subsets[n] = getLineSubset(grid, n);       /*  0..8  : lignes      */
+    all->subsets[9 + n] = getColSubset(grid, n);    /*  9..17 : colonnes    */
+    all->subsets[18 + n] = getSubsqSubset(grid, n); /* 18..26 : sous-carres */
   }
 
   for (int i = 0; i < SUBSET_COUNT; i++) {

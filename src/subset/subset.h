@@ -7,7 +7,7 @@
 #define SUBSET_COUNT 27
 
 typedef struct {
-    Subset subsets[SUBSET_COUNT];
+  Subset subsets[SUBSET_COUNT];
 } AllSubsets;
 
 /*
