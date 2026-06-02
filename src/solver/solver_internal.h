@@ -3,9 +3,12 @@
 
 #define TILES_PER_LINE 9
 
+#include "../subset/subset.h"
+#include "../sudoku_types/type_subset.h"
 #include "../sudoku_types/type_sudokutile.h"
 #include "solver.h"
 #include <stddef.h>
+#include <stdlib.h>
 
 unsigned char countCandidates(const SudokuTile *tile, char *candidate);
 void fixTileValue(SudokuTile *tile, char value);

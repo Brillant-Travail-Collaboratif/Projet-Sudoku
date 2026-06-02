@@ -38,6 +38,34 @@ char solveNakedSingles(Grid grid) {
   return modified;
 }
 
+char solve_hidden_singles_in_subset(Subset subset) {
+  if (subset == NULL)
+    return 0;
+
+  return solve_hidden_singles_in_line(*subset);
+}
+
+char solve_hidden_singles(Grid grid) {
+  if (grid == NULL)
+    return 0;
+
+  AllSubsets *all = malloc(sizeof(AllSubsets));
+  if (all == NULL)
+    return 0;
+
+  if (buildAllSubsets(grid, all) != 0)
+    return 0;
+
+  unsigned char modified = 0;
+
+  for (unsigned char i = 0; i < SUBSET_COUNT; i++) {
+    if (solve_hidden_singles_in_subset(all->subsets[i]) != 0)
+      modified = 1;
+  }
+
+  return modified;
+}
+
 char removeCandidate(SudokuTile *tile, char value) {
   if (tile->possible[value - 1]) {
     tile->possible[value - 1] = 0;
