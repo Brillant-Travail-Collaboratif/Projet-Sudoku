@@ -1,13 +1,14 @@
 #ifndef SOLVER_INTERNAL_H
 #define SOLVER_INTERNAL_H
 
+#define TILES_PER_LINE 9
+
+#include "../sudoku_types/type_sudokutile.h"
+#include "solver.h"
 #include <stddef.h>
 
-#include "solver.h"
-#include "../sudoku_types/type_sudokutile.h"
-
 unsigned char countCandidates(const SudokuTile *tile, char *candidate);
-
 void fixTileValue(SudokuTile *tile, char value);
+char removeCandidate(SudokuTile *tile, char value);
 
 #endif /* SOLVER_INTERNAL_H */
