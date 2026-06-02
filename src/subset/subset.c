@@ -29,6 +29,7 @@ Subset getColSubset(Grid grid, int n) {
         subset[k] = &grid[k * SUBSET_SIZE + n];
 
     return subset;
+
 }
 
 void deleteSubset(Subset subset) {
