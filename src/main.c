@@ -1,5 +1,6 @@
 #include "io/display.h"
 #include "io/read.h"
+#include "solver/solver.h"
 #include "sudoku_types/type_grid.h"
 #include <ncurses.h>
 
@@ -11,7 +12,14 @@ int main(int argc, char **argv) {
 
   Grid grid = loadSudokuFromFile("../doc/trivial_table_1.txt");
 
-  req_start_grid(grid);
+  displayFinal(grid);
+
+  clean_grid(grid);
+  solveNakedSingles(grid);
+  solve_hidden_singles(grid);
+  solveNakedSingles(grid);
+
+  displayFinal(grid);
 
   getch();
   endwin();

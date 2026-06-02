@@ -11,4 +11,6 @@ char solveNakedSingles(Grid grid);
 char cleanLine(SudokuTile *line);
 char cleanSubset(Subset s);
 char clean_grid(Grid grid);
+char solve_hidden_singles(Grid grid);
+
 #endif /* SOLVER_H */
