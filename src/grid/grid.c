@@ -5,7 +5,10 @@ Grid createGrid() {
   if (grid == NULL)
     return NULL;
 
-  char possible[NUMBER_OF_POSSIBLE] = {0};
+  char possible[NUMBER_OF_POSSIBLE];
+  for (unsigned char i = 0; i < NUMBER_OF_POSSIBLE; i++) {
+    possible[i] = 1;
+  }
   for (unsigned char i = 0; i < NUMBER_OF_TILE_IN_A_GRID; i++) {
     SudokuTile *newTile = createTile(0, possible);
     grid[i] = *newTile;
