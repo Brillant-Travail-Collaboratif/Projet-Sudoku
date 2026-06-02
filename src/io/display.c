@@ -1,5 +1,4 @@
 #include "display_internal.h"
-#include <ncurses.h>
 
 void displayFinal(Grid grid) {
   clear();
@@ -104,7 +103,10 @@ void req_start_grid(Grid grid) {
   }
 }
 void dispSubset(Subset s) {
-  if (s == NULL) { printf("(subset NULL)\n"); return; }
+  if (s == NULL) {
+    printf("(subset NULL)\n");
+    return;
+  }
 
   printf("+---+---+---+---+---+---+---+---+---+\n| ");
   for (unsigned char i = 0; i < GRID_SIDE; i++) {
@@ -126,10 +128,9 @@ void dispSubset(Subset s) {
           first = 0;
         }
       }
-      if (first) printf("(aucun)");
+      if (first)
+        printf("(aucun)");
       printf("\n");
     }
   }
-
-
 }
