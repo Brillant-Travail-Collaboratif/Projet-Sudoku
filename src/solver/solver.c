@@ -180,3 +180,38 @@ char clean_grid(Grid grid) {
 
   return modified;
 }
+
+/* Liste les candidats restants d'une case dans out[] (chiffres 1..9).Retourne le nombre de candidats. */
+
+static unsigned char list_candidates(SudokuTile *t, char out[NUMBER_OF_POSSIBLE]) {
+  unsigned char n = 0;
+  for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++) {
+    if (t->possible[d])
+      out[n++] = (char)(d + 1);
+  }
+  return n;
+}
+
+
+/* Versions grille : on boucle sur les 27 sous ensembles. */
+
+
+static char apply_rule_on_grid(Grid grid, char (*rule)(Subset)) {
+  if (grid == NULL || rule == NULL)
+    return 0;
+  AllSubsets *all = malloc(sizeof(AllSubsets));
+  if (all == NULL)
+    return 0;
+  if (buildAllSubsets(grid, all) != 0) {
+    free(all);
+    return 0;
+  }
+  char modified = 0;
+  for (unsigned char i = 0; i < SUBSET_COUNT; i++) {
+    if (rule(all->subsets[i]))
+      modified = 1;
+  }
+  freeAllSubsets(all);
+  free(all);
+  return modified;
+}
