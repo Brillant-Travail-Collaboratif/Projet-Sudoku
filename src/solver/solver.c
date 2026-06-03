@@ -317,3 +317,204 @@ char clean_hidden_pairs(Grid grid) {
 
   return apply_rule_on_grid(grid, clean_hidden_pairs_in_subset);
 }
+
+
+char clean_naked_triple_in_subset(Subset s) {
+  if (s == NULL)
+    return 0;
+
+  char modified = 0;
+  for (unsigned char i = 0; i < TILES_PER_LINE; i++) {
+    if (s[i]->value != 0)
+      continue;
+    char ci[NUMBER_OF_POSSIBLE];
+    int ni = list_candidates(s[i], ci);
+    if (ni < 2 || ni > 3)
+      continue;
+
+    for (unsigned char j = i + 1; j < TILES_PER_LINE; j++) {
+      if (s[j]->value != 0)
+        continue;
+      char cj[NUMBER_OF_POSSIBLE];
+      int nj = list_candidates(s[j], cj);
+      if (nj < 2 || nj > 3)
+        continue;
+
+      for (unsigned char k = j + 1; k < TILES_PER_LINE; k++) {
+        if (s[k]->value != 0)
+          continue;
+        char ck[NUMBER_OF_POSSIBLE];
+        int nk = list_candidates(s[k], ck);
+        if (nk < 2 || nk > 3)
+          continue;
+
+        char union_vals[NUMBER_OF_POSSIBLE];
+        int union_size = 0;
+
+
+        for (int a = 0; a < ni; a++) {
+          char found = 0;
+          for (int b = 0; b < union_size; b++)
+            if (union_vals[b] == ci[a]) { found = 1; break; }
+          if (!found)
+            union_vals[union_size++] = ci[a];
+        }
+
+        for (int a = 0; a < nj; a++) {
+          char found = 0;
+          for (int b = 0; b < union_size; b++)
+            if (union_vals[b] == cj[a]) { found = 1; break; }
+          if (!found)
+            union_vals[union_size++] = cj[a];
+        }
+
+        for (int a = 0; a < nk; a++) {
+          char found = 0;
+          for (int b = 0; b < union_size; b++)
+            if (union_vals[b] == ck[a]) { found = 1; break; }
+          if (!found)
+            union_vals[union_size++] = ck[a];
+        }
+
+
+        if (union_size != 3)
+          continue;
+
+
+        for (unsigned char l = 0; l < TILES_PER_LINE; l++) {
+          if (l == i || l == j || l == k || s[l]->value != 0)
+            continue;
+          for (int a = 0; a < union_size; a++)
+            if (removeCandidate(s[l], union_vals[a]))
+              modified = 1;
+        }
+      }
+    }
+  }
+  return modified;
+}
+
+char clean_naked_triples(Grid grid) {
+  return apply_rule_on_grid(grid, clean_naked_triple_in_subset);
+}
+
+
+char clean_hidden_triples_in_subset(Subset subset) {
+  if (subset == NULL)
+    return 0;
+
+
+  unsigned char candidates[NUMBER_OF_POSSIBLE][4];
+
+  for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++) {
+    candidates[d][0] = 0;
+    candidates[d][1] = 0;
+    candidates[d][2] = 0;
+    candidates[d][3] = 0;
+  }
+
+  for (unsigned char digit = 0; digit < NUMBER_OF_POSSIBLE; digit++) {
+    for (unsigned char pos = 0; pos < TILES_PER_LINE; pos++) {
+      if (subset[pos]->possible[digit] != 0) {
+        if (candidates[digit][3] < 3)
+          candidates[digit][candidates[digit][3]] = pos;
+        candidates[digit][3]++;
+      }
+    }
+  }
+
+  char modified = 0;
+
+  for (unsigned char d1 = 0; d1 < NUMBER_OF_POSSIBLE; d1++) {
+    if (candidates[d1][3] < 2 || candidates[d1][3] > 3)
+      continue;
+
+    for (unsigned char d2 = d1 + 1; d2 < NUMBER_OF_POSSIBLE; d2++) {
+      if (candidates[d2][3] < 2 || candidates[d2][3] > 3)
+        continue;
+
+      for (unsigned char d3 = d2 + 1; d3 < NUMBER_OF_POSSIBLE; d3++) {
+        if (candidates[d3][3] < 2 || candidates[d3][3] > 3)
+          continue;
+
+
+        unsigned char union_pos[3];
+        unsigned char union_size = 0;
+
+
+        for (unsigned char a = 0; a < candidates[d1][3] && a < 3; a++) {
+          unsigned char found = 0;
+          for (unsigned char b = 0; b < union_size; b++)
+            if (union_pos[b] == candidates[d1][a]) { found = 1; break; }
+          if (!found && union_size < 3)
+            union_pos[union_size++] = candidates[d1][a];
+        }
+
+        for (unsigned char a = 0; a < candidates[d2][3] && a < 3; a++) {
+          unsigned char found = 0;
+          for (unsigned char b = 0; b < union_size; b++)
+            if (union_pos[b] == candidates[d2][a]) { found = 1; break; }
+          if (!found && union_size < 3)
+            union_pos[union_size++] = candidates[d2][a];
+        }
+
+        for (unsigned char a = 0; a < candidates[d3][3] && a < 3; a++) {
+          unsigned char found = 0;
+          for (unsigned char b = 0; b < union_size; b++)
+            if (union_pos[b] == candidates[d3][a]) { found = 1; break; }
+          if (!found && union_size < 3)
+            union_pos[union_size++] = candidates[d3][a];
+        }
+
+
+        if (union_size != 3)
+          continue;
+
+
+        unsigned char overflow = 0;
+        if (candidates[d1][3] > 3 || candidates[d2][3] > 3 || candidates[d3][3] > 3)
+          overflow = 1;
+
+        for (unsigned char a = 0; a < candidates[d1][3] && !overflow; a++) {
+          unsigned char in_union = 0;
+          for (unsigned char b = 0; b < union_size; b++)
+            if (union_pos[b] == candidates[d1][a]) { in_union = 1; break; }
+          if (!in_union) overflow = 1;
+        }
+        for (unsigned char a = 0; a < candidates[d2][3] && !overflow; a++) {
+          unsigned char in_union = 0;
+          for (unsigned char b = 0; b < union_size; b++)
+            if (union_pos[b] == candidates[d2][a]) { in_union = 1; break; }
+          if (!in_union) overflow = 1;
+        }
+        for (unsigned char a = 0; a < candidates[d3][3] && !overflow; a++) {
+          unsigned char in_union = 0;
+          for (unsigned char b = 0; b < union_size; b++)
+            if (union_pos[b] == candidates[d3][a]) { in_union = 1; break; }
+          if (!in_union) overflow = 1;
+        }
+        if (overflow)
+          continue;
+
+
+        for (unsigned char p = 0; p < union_size; p++) {
+          unsigned char pos = union_pos[p];
+          for (unsigned char digit = 0; digit < NUMBER_OF_POSSIBLE; digit++) {
+            if (digit == d1 || digit == d2 || digit == d3)
+              continue;
+            if (subset[pos]->possible[digit] == 1)
+              modified = 1;
+            subset[pos]->possible[digit] = 0;
+          }
+        }
+      }
+    }
+  }
+  return modified;
+}
+
+char clean_hidden_triples(Grid grid) {
+  if (grid == NULL)
+    return 0;
+  return apply_rule_on_grid(grid, clean_hidden_triples_in_subset);
+}

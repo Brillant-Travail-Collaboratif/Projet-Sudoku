@@ -13,9 +13,16 @@ char cleanSubset(Subset s);
 char clean_grid(Grid grid);
 char solve_hidden_singles(Grid grid);
 char clean_hidden_pairs(Grid grid);
-
-
+char clean_naked_triples(Grid grid);
+char clean_hidden_triples(Grid grid);
 
 char clean_naked_pair_in_subset(Subset s);
 char clean_naked_pairs(Grid grid);
+
+char clean_naked_triple_in_subset(Subset s);
+char clean_naked_triples(Grid grid);
+
+char clean_hidden_triples_in_subset(Subset subset);
+char clean_hidden_triples(Grid grid);
+
 #endif /* SOLVER_H */
