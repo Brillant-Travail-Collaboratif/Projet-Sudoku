@@ -14,4 +14,8 @@ char clean_grid(Grid grid);
 char solve_hidden_singles(Grid grid);
 char clean_hidden_pairs(Grid grid);
 
+
+
+char clean_naked_pair_in_subset(Subset s);
+char clean_naked_pairs(Grid grid);
 #endif /* SOLVER_H */

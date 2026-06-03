@@ -203,6 +203,59 @@ static char apply_rule_on_grid(Grid grid, char (*rule)(Subset)) {
   return modified;
 }
 
+/* Liste les candidats restants d'une case dans out[] (chiffres 1..9).Retourne
+ * le nombre de candidats. */
+
+static unsigned char list_candidates(SudokuTile *t,
+                                     char out[NUMBER_OF_POSSIBLE]) {
+  unsigned char n = 0;
+  for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++) {
+    if (t->possible[d])
+      out[n++] = (char)(d + 1);
+  }
+  return n;
+}
+
+char clean_naked_pair_in_subset(Subset s) {
+  if (s == NULL)
+    return 0;
+
+  char modified = 0;
+  for (unsigned char i = 0; i < TILES_PER_LINE; i++) {
+    if (s[i]->value != 0)
+      continue;
+    char ci[NUMBER_OF_POSSIBLE];
+    if (list_candidates(s[i], ci) != 2)
+      continue;
+
+    for (unsigned char j = i + 1; j < TILES_PER_LINE; j++) {
+      if (s[j]->value != 0)
+        continue;
+      char cj[NUMBER_OF_POSSIBLE];
+      if (list_candidates(s[j], cj) != 2)
+        continue;
+      if (ci[0] != cj[0] || ci[1] != cj[1])
+        continue;
+
+      /* Quand on trouve une paire , on nettoie les autres cases inconnues du
+       * subset. */
+      for (unsigned char k = 0; k < TILES_PER_LINE; k++) {
+        if (k == i || k == j || s[k]->value != 0)
+          continue;
+        if (removeCandidate(s[k], ci[0]))
+          modified = 1;
+        if (removeCandidate(s[k], ci[1]))
+          modified = 1;
+      }
+    }
+  }
+  return modified;
+}
+
+char clean_naked_pairs(Grid grid) {
+  return apply_rule_on_grid(grid, clean_naked_pair_in_subset);
+}
+
 char clean_hidden_pairs_in_subset(Subset subset) {
   if (subset == NULL)
     return 0;
