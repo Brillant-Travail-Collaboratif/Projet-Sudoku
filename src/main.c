@@ -1,3 +1,4 @@
+#include "grid/grid.h"
 #include "io/display.h"
 #include "io/read.h"
 #include "solver/solver.h"
@@ -10,7 +11,7 @@ int main(int argc, char **argv) {
   noecho();
   keypad(stdscr, TRUE);
 
-  Grid grid = loadSudokuFromFile("../doc/intermediate_table_1.txt");
+  Grid grid = loadSudokuFromFile("../doc/difficile_table_1.txt");
 
   req_start_grid(grid);
 
@@ -21,9 +22,10 @@ int main(int argc, char **argv) {
     modified |= solveNakedSingles(grid);
     modified |= solve_hidden_singles(grid);
     modified |= solveNakedSingles(grid);
+    modified |= clean_hidden_pairs(grid);
   } while (modified);
 
-  displayFinal(grid);
+  req_start_grid(grid);
 
   getch();
   endwin();

@@ -45,7 +45,7 @@ char tileGetValue(SudokuTile *tile) {
 }
 
 char *tileGetPossible(SudokuTile *tile) {
-  if (tile == NULL || !isPossibleValid(tile->possible))
+  if (tile == NULL || isPossibleValid(tile->possible))
     return NULL;
 
   return tile->possible;
@@ -61,7 +61,7 @@ char tileSetValue(SudokuTile *tile, char value) {
 }
 
 char tileSetPossible(SudokuTile *tile, char possible[NUMBER_OF_POSSIBLE]) {
-  if (tile == NULL || !isPossibleValid(possible))
+  if (tile == NULL || isPossibleValid(possible))
     return 1;
 
   for (unsigned char i = 0; i < NUMBER_OF_POSSIBLE; i++) {

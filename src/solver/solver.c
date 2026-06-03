@@ -181,20 +181,7 @@ char clean_grid(Grid grid) {
   return modified;
 }
 
-/* Liste les candidats restants d'une case dans out[] (chiffres 1..9).Retourne le nombre de candidats. */
-
-static unsigned char list_candidates(SudokuTile *t, char out[NUMBER_OF_POSSIBLE]) {
-  unsigned char n = 0;
-  for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++) {
-    if (t->possible[d])
-      out[n++] = (char)(d + 1);
-  }
-  return n;
-}
-
-
 /* Versions grille : on boucle sur les 27 sous ensembles. */
-
 
 static char apply_rule_on_grid(Grid grid, char (*rule)(Subset)) {
   if (grid == NULL || rule == NULL)
@@ -214,4 +201,66 @@ static char apply_rule_on_grid(Grid grid, char (*rule)(Subset)) {
   freeAllSubsets(all);
   free(all);
   return modified;
+}
+
+char clean_hidden_pairs_in_subset(Subset subset) {
+  if (subset == NULL)
+    return 0;
+
+  unsigned char candidates[NUMBER_OF_POSSIBLE][3];
+
+  for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++) {
+    candidates[d][0] = 0;
+    candidates[d][1] = 0;
+    candidates[d][2] = 0;
+  }
+
+  for (unsigned char digit = 0; digit < NUMBER_OF_POSSIBLE; digit++) {
+    for (unsigned char pos = 0; pos < NUMBER_OF_POSSIBLE; pos++) {
+      if (subset[pos]->possible[digit] != 0) {
+        if (candidates[digit][2] < 2) {
+          candidates[digit][candidates[digit][2]] = pos;
+        }
+        candidates[digit][2]++;
+      }
+    }
+  }
+
+  unsigned char modified = 0;
+
+  for (unsigned char d1 = 0; d1 < NUMBER_OF_POSSIBLE; d1++) {
+    if (candidates[d1][2] != 2)
+      continue;
+
+    for (unsigned char d2 = d1 + 1; d2 < NUMBER_OF_POSSIBLE; d2++) {
+      if (candidates[d2][2] != 2)
+        continue;
+
+      unsigned char a1 = candidates[d1][0];
+      unsigned char a2 = candidates[d1][1];
+      unsigned char b1 = candidates[d2][0];
+      unsigned char b2 = candidates[d2][1];
+
+      if ((a1 == b1 && a2 == b2) || (a1 == b2 && a2 == b1)) {
+        for (unsigned char digit = 0; digit < NUMBER_OF_POSSIBLE; digit++) {
+          if (digit != d1 && digit != d2) {
+            if (subset[a1]->possible[digit] == 1 ||
+                subset[a2]->possible[digit] == 1)
+              modified = 1;
+            subset[a1]->possible[digit] = 0;
+            subset[a2]->possible[digit] = 0;
+          }
+        }
+      }
+    }
+  }
+
+  return modified;
+}
+
+char clean_hidden_pairs(Grid grid) {
+  if (grid == NULL)
+    return 0;
+
+  return apply_rule_on_grid(grid, clean_hidden_pairs_in_subset);
 }
