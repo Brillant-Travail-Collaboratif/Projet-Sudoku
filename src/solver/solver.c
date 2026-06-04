@@ -582,7 +582,7 @@ char guess_value(Grid grid) {
   return 0;
 }
 
-void play_back(Grid grid) {
+void back_play(Grid grid) {
   if (grid == NULL || history_index <= 0)
     return;
 
@@ -616,4 +616,43 @@ void play_back(Grid grid) {
     guessedTile->possible[guessedValue - 1] = 0;
 
   history_index = affectation;
+}
+
+
+static void deduce_until_stable(void) {
+  char modified;
+  do {
+    modified = 0;
+    if (clean_grid())            modified = 1;
+    if (solveNakedSingles())   modified = 1;
+    if (solve_hidden_singles())  modified = 1;
+  } while (modified);
+}
+
+
+static char has_pending_supposition(void) {
+  for (int i = history_index - 1; i >= 0; i--)
+    if (history[i].supposed) return 1;
+  return 0;
+}
+
+char solve(void) {
+  while (1) {
+    deduce_until_stable();
+
+    if (!is_grid_valid()) {
+
+      if (!has_pending_supposition())
+        return 0;
+      back_play();
+      continue;
+    }
+
+    if (grid_filled_count() == GRID_SIZE)
+      return 1;
+
+
+    if (!guess_value())
+      return 0;
+  }
 }

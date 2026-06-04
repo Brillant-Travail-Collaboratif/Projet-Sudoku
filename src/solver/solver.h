@@ -30,4 +30,10 @@ char clean_hidden_triples(Grid grid);
 
 char is_grid_valid(Grid grid);
 char guess_value(Grid grid);
+
+void back_play(Grid grid);
+
+
+char solve(void);
+
 #endif /* SOLVER_H */
