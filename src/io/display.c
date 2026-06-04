@@ -74,12 +74,12 @@ void req_start_grid(Grid grid) {
       if (x + 1 <= NUMBER_OF_POSSIBLE)
         x++;
     } else if (ch == '?') {
-      gridSetValueXY(grid, x, y, 0);
+      gridSetValueXY(grid, x, y, 0, 0);
       refresh();
     } else {
       ch -= 48;
       if (ch > 0 && ch <= 10)
-        gridSetValueXY(grid, x, y, ch);
+        gridSetValueXY(grid, x, y, ch, 0);
     }
 
     unsigned char mvx, mvy;

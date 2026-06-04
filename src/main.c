@@ -14,14 +14,7 @@ int main(int argc, char **argv) {
 
   req_start_grid(grid);
 
-  unsigned char modified = 0;
-
-  do {
-    modified = clean_grid(grid);
-    modified |= solveNakedSingles(grid);
-    modified |= solve_hidden_singles(grid);
-    modified |= solveNakedSingles(grid);
-  } while (modified);
+  solve(grid);
 
   displayFinal(grid);
 

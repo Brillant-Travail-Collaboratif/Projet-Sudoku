@@ -1,5 +1,8 @@
 #include "tile_internal.h"
 
+Affectation history[81];
+int history_index;
+
 SudokuTile *createTile(const char value,
                        const char possible[NUMBER_OF_POSSIBLE]) {
   if (isValueValid(value) || isPossibleValid(possible))
@@ -45,23 +48,36 @@ char tileGetValue(SudokuTile *tile) {
 }
 
 char *tileGetPossible(SudokuTile *tile) {
-  if (tile == NULL || !isPossibleValid(tile->possible))
+  if (tile == NULL || isPossibleValid(tile->possible))
     return NULL;
 
   return tile->possible;
 }
 
-char tileSetValue(SudokuTile *tile, char value) {
-  if (tile == NULL || isValueValid(value)) {
+char tileSetValue(SudokuTile *tile, char value, unsigned char supposed) {
+  if (tile == NULL || isValueValid(value))
     return 1;
-  }
 
   tile->value = value;
+
+  if (value != 0) {
+    for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++)
+      tile->possible[d] = 0;
+    tile->possible[value - 1] = 1;
+  }
+
+  if (value != 0) {
+    if (history_index > 80)
+      return 1;
+    history[history_index].tile = tile;
+    history[history_index].value = value;
+    history[history_index++].supposed = supposed;
+  }
   return 0;
 }
 
 char tileSetPossible(SudokuTile *tile, char possible[NUMBER_OF_POSSIBLE]) {
-  if (tile == NULL || !isPossibleValid(possible))
+  if (tile == NULL || isPossibleValid(possible))
     return 1;
 
   for (unsigned char i = 0; i < NUMBER_OF_POSSIBLE; i++) {

@@ -20,9 +20,9 @@ Grid loadSudokuFromFile(const char *filename) {
     for (unsigned char column = 0; column < 9; column++) {
       char value = buffer[column * 2];
       if (value >= '1' && value <= '9')
-        gridSetValueXY(grid, column + 1, row + 1, value - '0');
+        gridSetValueXY(grid, column + 1, row + 1, value - '0', 0);
       else
-        gridSetValueXY(grid, column + 1, row + 1, 0);
+        gridSetValueXY(grid, column + 1, row + 1, 0, 0);
     }
   }
   fclose(file);
