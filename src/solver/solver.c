@@ -556,3 +556,25 @@ char is_grid_valid(void) {
   }
   return 1;
 }
+char guess_value(void) {
+    for (int i = 0; i < GRID_SIZE; i++) {
+        if (grid[i].value != 0) continue;
+
+
+        int count = 0;
+        int first_val = -1;
+        for (int d = 0; d < GRID_SIDE; d++) {
+            if (grid[i].possible[d]) {
+                count++;
+                if (first_val == -1) first_val = d + 1;
+            }
+        }
+
+        if (count == 2) {
+
+            tileSetValue(&grid[i], (char)first_val, 1);
+            return 1;
+        }
+    }
+    return 0;
+}

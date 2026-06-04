@@ -31,5 +31,5 @@ char clean_hidden_triples_in_subset(Subset subset);
 char clean_hidden_triples(Grid grid);
 
 char is_grid_valid(void);
-
+char guess_value(void);
 #endif /* SOLVER_H */
