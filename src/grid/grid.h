@@ -2,6 +2,10 @@
 #define GRID_H
 
 #include "../sudoku_types/type_grid.h"
+#include "../sudoku_types/type_history.h"
+#include "../sudoku_types/type_sudokutile.h"
+
+extern SudokuTile grid[GRID_SIZE];
 
 Grid createGrid();
 void deleteGrid(Grid grid);

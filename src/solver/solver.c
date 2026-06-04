@@ -1,4 +1,9 @@
+#include "solver.h"
 #include "solver_internal.h"
+#include "grid.h"
+#include <stddef.h>
+
+Affectation history[GRID_SIZE];
 
 unsigned char countCandidates(const SudokuTile *tile, char *candidate) {
   unsigned char count = 0;
@@ -537,4 +542,17 @@ char clean_hidden_triples(Grid grid) {
   if (grid == NULL)
     return 0;
   return apply_rule_on_grid(grid, clean_hidden_triples_in_subset);
+}
+
+
+char is_grid_valid(void) {
+  for (int i = 0; i < GRID_SIZE; i++) {
+    if (grid[i].value != 0) continue;
+    char any = 0;
+    for (int d = 0; d < GRID_SIDE; d++) {
+      if (grid[i].possible[d]) { any = 1; break; }
+    }
+    if (!any) return 0;
+  }
+  return 1;
 }
