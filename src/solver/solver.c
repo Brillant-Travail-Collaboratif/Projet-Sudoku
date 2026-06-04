@@ -14,7 +14,8 @@ unsigned char countCandidates(const SudokuTile *tile, char *candidate) {
 }
 
 void fixTileValue(SudokuTile *tile, char value) {
-  tile->value = value;
+  if (tileSetValue(tile, value, 0) != 0)
+    return;
   for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++)
     tile->possible[d] = 0;
   tile->possible[value - 1] = 1;
@@ -76,8 +77,10 @@ char solve_hidden_singles(Grid grid) {
   if (all == NULL)
     return 0;
 
-  if (buildAllSubsets(grid, all) != 0)
+  if (buildAllSubsets(grid, all) != 0) {
+    free(all);
     return 0;
+  }
 
   unsigned char modified = 0;
 
@@ -86,6 +89,8 @@ char solve_hidden_singles(Grid grid) {
       modified = 1;
   }
 
+  freeAllSubsets(all);
+  free(all);
   return modified;
 }
 
@@ -170,8 +175,10 @@ char clean_grid(Grid grid) {
   if (all == NULL)
     return 0;
 
-  if (buildAllSubsets(grid, all) != 0)
+  if (buildAllSubsets(grid, all) != 0) {
+    free(all);
     return 0;
+  }
 
   unsigned char modified = 0;
 
@@ -180,6 +187,8 @@ char clean_grid(Grid grid) {
       modified = 1;
   }
 
+  freeAllSubsets(all);
+  free(all);
   return modified;
 }
 
@@ -543,70 +552,68 @@ char clean_hidden_triples(Grid grid) {
 char is_grid_valid(Grid grid) {
   if (grid == NULL)
     return 0;
-
-  AllSubsets *all = malloc(sizeof(AllSubsets));
-  if (all == NULL)
-    return 0;
-
-  if (buildAllSubsets(grid, all) != 0) {
-    free(all);
-    return 0;
-  }
-
-  for (int subset = 0; subset < SUBSET_COUNT; subset++) {
-    char seen[GRID_SIDE] = {0};
-    for (int pos = 0; pos < GRID_SIDE; pos++) {
-      char value = all->subsets[subset][pos]->value;
-      if (value == 0)
-        continue;
-      if (seen[value - 1]) {
-        freeAllSubsets(all);
-        free(all);
-        return 0;
-      }
-      seen[value - 1] = 1;
-    }
-  }
-
-  freeAllSubsets(all);
-  free(all);
-
-  for (int i = 0; i < GRID_SIZE; i++) {
+  /* (a) Aucune case inconnue ne doit etre privee de candidats. */
+  for (int i = 0; i < NUMBER_OF_TILE_IN_A_GRID; i++) {
     if (grid[i].value != 0)
       continue;
     char any = 0;
-    for (int d = 0; d < GRID_SIDE; d++) {
+    for (int d = 0; d < NUMBER_OF_POSSIBLE; d++)
       if (grid[i].possible[d]) {
         any = 1;
         break;
       }
-    }
     if (!any)
       return 0;
   }
+  /* (b) Aucun sous-ensemble ne doit contenir deux fois la meme valeur fixee.
+     Ce cas n'arrive jamais en deduction propre, mais peut survenir apres
+     une supposition fausse propagee : on doit le detecter pour declencher
+     back_play() au lieu de retourner une grille complete et incorrecte. */
+  AllSubsets *all = malloc(sizeof(AllSubsets));
+  if (all == NULL)
+    return 1; /* en cas de OOM, ne pas mentir : autorise */
+  if (buildAllSubsets(grid, all) != 0) {
+    free(all);
+    return 1;
+  }
+  for (int s = 0; s < SUBSET_COUNT; s++) {
+    char seen[NUMBER_OF_POSSIBLE] = {0};
+    for (int k = 0; k < TILES_PER_LINE; k++) {
+      char v = all->subsets[s][k]->value;
+      if (v == 0)
+        continue;
+      if (seen[v - 1]) {
+        freeAllSubsets(all);
+        free(all);
+        return 0;
+      }
+      seen[v - 1] = 1;
+    }
+  }
+  freeAllSubsets(all);
+  free(all);
   return 1;
 }
 
 char guess_value(Grid grid) {
-  for (int expected_count = 2; expected_count <= GRID_SIDE; expected_count++) {
-    for (int i = 0; i < GRID_SIZE; i++) {
-      if (grid[i].value != 0)
-        continue;
+  for (int i = 0; i < GRID_SIZE; i++) {
+    if (grid[i].value != 0)
+      continue;
 
-      int count = 0;
-      int first_val = -1;
-      for (int d = 0; d < GRID_SIDE; d++) {
-        if (grid[i].possible[d]) {
-          count++;
-          if (first_val == -1)
-            first_val = d + 1;
-        }
+    int count = 0;
+    int first_val = -1;
+    for (int d = 0; d < GRID_SIDE; d++) {
+      if (grid[i].possible[d]) {
+        count++;
+        if (first_val == -1)
+          first_val = d + 1;
       }
+    }
 
-      if (count == expected_count) {
-        tileSetValue(&grid[i], (char)first_val, 1);
-        return 1;
-      }
+    if (count == 2) {
+
+      tileSetValue(&grid[i], (char)first_val, 1);
+      return 1;
     }
   }
   return 0;
@@ -670,19 +677,28 @@ char has_pending_supposition() {
   return 0;
 }
 
+static int filled_count(Grid grid) {
+  int c = 0;
+  for (int i = 0; i < NUMBER_OF_TILE_IN_A_GRID; i++)
+    if (grid[i].value != 0)
+      c++;
+  return c;
+}
+
 char solve(Grid grid) {
+  if (grid == NULL)
+    return 0;
   while (1) {
     deduce_until_stable(grid);
 
     if (!is_grid_valid(grid)) {
-
       if (!has_pending_supposition())
         return 0;
       back_play(grid);
       continue;
     }
 
-    if (grid_filled_count(grid) == GRID_SIZE)
+    if (filled_count(grid) == NUMBER_OF_TILE_IN_A_GRID)
       return 1;
 
     if (!guess_value(grid))

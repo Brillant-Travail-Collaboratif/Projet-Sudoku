@@ -10,13 +10,13 @@ int main(int argc, char **argv) {
   noecho();
   keypad(stdscr, TRUE);
 
-  Grid grid = loadSudokuFromFile("../doc/expert_table_1.txt");
+  Grid grid = loadSudokuFromFile("../doc/intermediate_table_1.txt");
 
   req_start_grid(grid);
 
   solve(grid);
 
-  req_start_grid(grid);
+  displayFinal(grid);
 
   getch();
   endwin();

@@ -61,6 +61,8 @@ char gridSetPossibleXY(Grid grid, unsigned char x, unsigned char y,
 }
 
 int grid_filled_count(Grid grid) {
+  if (grid == NULL)
+    return 0;
   int count = 0;
   for (int i = 0; i < GRID_SIZE; i++)
     if (grid[i].value != 0)

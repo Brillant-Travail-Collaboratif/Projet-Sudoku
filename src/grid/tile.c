@@ -55,18 +55,24 @@ char *tileGetPossible(SudokuTile *tile) {
 }
 
 char tileSetValue(SudokuTile *tile, char value, unsigned char supposed) {
-  if (tile == NULL || isValueValid(value)) {
+  if (tile == NULL || isValueValid(value))
     return 1;
-  }
 
   tile->value = value;
 
-  if (history_index > 80)
-    return 1;
-  history[history_index].tile = tile;
-  history[history_index].value = value;
-  history[history_index++].supposed = supposed;
+  if (value != 0) {
+    for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++)
+      tile->possible[d] = 0;
+    tile->possible[value - 1] = 1;
+  }
 
+  if (value != 0) {
+    if (history_index > 80)
+      return 1;
+    history[history_index].tile = tile;
+    history[history_index].value = value;
+    history[history_index++].supposed = supposed;
+  }
   return 0;
 }
 
