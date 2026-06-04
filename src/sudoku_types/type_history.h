@@ -3,6 +3,9 @@
 
 #include "type_sudokutile.h"
 
+#define GRID_SIZE    81
+#define GRID_SIDE    9
+
 typedef struct Affectation {
   SudokuTile *tile;
   char supposed;

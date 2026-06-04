@@ -1,4 +1,6 @@
+#include "solver.h"
 #include "solver_internal.h"
+#include <stddef.h>
 
 unsigned char countCandidates(const SudokuTile *tile, char *candidate) {
   unsigned char count = 0;
@@ -537,6 +539,47 @@ char clean_hidden_triples(Grid grid) {
   if (grid == NULL)
     return 0;
   return apply_rule_on_grid(grid, clean_hidden_triples_in_subset);
+}
+
+char is_grid_valid(void) {
+  for (int i = 0; i < GRID_SIZE; i++) {
+    if (grid[i].value != 0)
+      continue;
+    char any = 0;
+    for (int d = 0; d < GRID_SIDE; d++) {
+      if (grid[i].possible[d]) {
+        any = 1;
+        break;
+      }
+    }
+    if (!any)
+      return 0;
+  }
+  return 1;
+}
+
+char guess_value(void) {
+  for (int i = 0; i < GRID_SIZE; i++) {
+    if (grid[i].value != 0)
+      continue;
+
+    int count = 0;
+    int first_val = -1;
+    for (int d = 0; d < GRID_SIDE; d++) {
+      if (grid[i].possible[d]) {
+        count++;
+        if (first_val == -1)
+          first_val = d + 1;
+      }
+    }
+
+    if (count == 2) {
+
+      tileSetValue(&grid[i], (char)first_val, 1);
+      return 1;
+    }
+  }
+  return 0;
 }
 
 void play_back(Grid grid) {
