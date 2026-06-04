@@ -541,7 +541,7 @@ char clean_hidden_triples(Grid grid) {
   return apply_rule_on_grid(grid, clean_hidden_triples_in_subset);
 }
 
-char is_grid_valid(void) {
+char is_grid_valid(Grid grid) {
   for (int i = 0; i < GRID_SIZE; i++) {
     if (grid[i].value != 0)
       continue;
@@ -558,7 +558,7 @@ char is_grid_valid(void) {
   return 1;
 }
 
-char guess_value(void) {
+char guess_value(Grid grid) {
   for (int i = 0; i < GRID_SIZE; i++) {
     if (grid[i].value != 0)
       continue;

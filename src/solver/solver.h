@@ -3,13 +3,11 @@
 
 #include "../grid/grid.h"
 #include "../grid/tile.h"
+#include "../sudoku_types/type_history.h"
 #include "../sudoku_types/type_subset.h"
 #include "../sudoku_types/type_sudokutile.h"
-#include "../sudoku_types/type_history.h"
-
 
 extern Affectation history[GRID_SIZE];
-
 
 char solve_hidden_singles_in_line(SudokuTile *line);
 char solveNakedSingles(Grid grid);
@@ -30,6 +28,6 @@ char clean_naked_triples(Grid grid);
 char clean_hidden_triples_in_subset(Subset subset);
 char clean_hidden_triples(Grid grid);
 
-char is_grid_valid(void);
-char guess_value(void);
+char is_grid_valid(Grid grid);
+char guess_value(Grid grid);
 #endif /* SOLVER_H */

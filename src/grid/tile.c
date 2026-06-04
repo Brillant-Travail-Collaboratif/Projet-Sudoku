@@ -1,5 +1,8 @@
 #include "tile_internal.h"
 
+Affectation history[81];
+int history_index;
+
 SudokuTile *createTile(const char value,
                        const char possible[NUMBER_OF_POSSIBLE]) {
   if (isValueValid(value) || isPossibleValid(possible))
