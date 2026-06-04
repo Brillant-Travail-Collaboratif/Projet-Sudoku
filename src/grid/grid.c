@@ -60,9 +60,7 @@ char gridSetPossibleXY(Grid grid, unsigned char x, unsigned char y,
   return tileSetPossible(&grid[(y - 1) * 9 + (x - 1)], possible);
 }
 
-
-int grid_filled_count(void)
-{
+int grid_filled_count(Grid grid) {
   int count = 0;
   for (int i = 0; i < GRID_SIZE; i++)
     if (grid[i].value != 0)

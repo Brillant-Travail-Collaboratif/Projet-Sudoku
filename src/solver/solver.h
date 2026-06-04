@@ -33,7 +33,6 @@ char guess_value(Grid grid);
 
 void back_play(Grid grid);
 
-
-char solve(void);
+char solve(Grid grid);
 
 #endif /* SOLVER_H */

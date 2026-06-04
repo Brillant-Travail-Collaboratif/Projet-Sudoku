@@ -17,4 +17,10 @@ char removeCandidate(SudokuTile *tile, char value);
 char solveHiddenSinglesInSubset(Subset s);
 char clean_hidden_pairs_in_subset(Subset subset);
 
+char apply_rule_on_grid(Grid grid, char (*rule)(Subset));
+unsigned char list_candidates(SudokuTile *t, char out[NUMBER_OF_POSSIBLE]);
+
+void deduce_until_stable(Grid grid);
+char has_pending_supposition();
+
 #endif /* SOLVER_INTERNAL_H */

@@ -185,7 +185,7 @@ char clean_grid(Grid grid) {
 
 /* Versions grille : on boucle sur les 27 sous ensembles. */
 
-static char apply_rule_on_grid(Grid grid, char (*rule)(Subset)) {
+char apply_rule_on_grid(Grid grid, char (*rule)(Subset)) {
   if (grid == NULL || rule == NULL)
     return 0;
   AllSubsets *all = malloc(sizeof(AllSubsets));
@@ -208,8 +208,7 @@ static char apply_rule_on_grid(Grid grid, char (*rule)(Subset)) {
 /* Liste les candidats restants d'une case dans out[] (chiffres 1..9).Retourne
  * le nombre de candidats. */
 
-static unsigned char list_candidates(SudokuTile *t,
-                                     char out[NUMBER_OF_POSSIBLE]) {
+unsigned char list_candidates(SudokuTile *t, char out[NUMBER_OF_POSSIBLE]) {
   unsigned char n = 0;
   for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++) {
     if (t->possible[d])
@@ -542,6 +541,36 @@ char clean_hidden_triples(Grid grid) {
 }
 
 char is_grid_valid(Grid grid) {
+  if (grid == NULL)
+    return 0;
+
+  AllSubsets *all = malloc(sizeof(AllSubsets));
+  if (all == NULL)
+    return 0;
+
+  if (buildAllSubsets(grid, all) != 0) {
+    free(all);
+    return 0;
+  }
+
+  for (int subset = 0; subset < SUBSET_COUNT; subset++) {
+    char seen[GRID_SIDE] = {0};
+    for (int pos = 0; pos < GRID_SIDE; pos++) {
+      char value = all->subsets[subset][pos]->value;
+      if (value == 0)
+        continue;
+      if (seen[value - 1]) {
+        freeAllSubsets(all);
+        free(all);
+        return 0;
+      }
+      seen[value - 1] = 1;
+    }
+  }
+
+  freeAllSubsets(all);
+  free(all);
+
   for (int i = 0; i < GRID_SIZE; i++) {
     if (grid[i].value != 0)
       continue;
@@ -559,24 +588,25 @@ char is_grid_valid(Grid grid) {
 }
 
 char guess_value(Grid grid) {
-  for (int i = 0; i < GRID_SIZE; i++) {
-    if (grid[i].value != 0)
-      continue;
+  for (int expected_count = 2; expected_count <= GRID_SIDE; expected_count++) {
+    for (int i = 0; i < GRID_SIZE; i++) {
+      if (grid[i].value != 0)
+        continue;
 
-    int count = 0;
-    int first_val = -1;
-    for (int d = 0; d < GRID_SIDE; d++) {
-      if (grid[i].possible[d]) {
-        count++;
-        if (first_val == -1)
-          first_val = d + 1;
+      int count = 0;
+      int first_val = -1;
+      for (int d = 0; d < GRID_SIDE; d++) {
+        if (grid[i].possible[d]) {
+          count++;
+          if (first_val == -1)
+            first_val = d + 1;
+        }
       }
-    }
 
-    if (count == 2) {
-
-      tileSetValue(&grid[i], (char)first_val, 1);
-      return 1;
+      if (count == expected_count) {
+        tileSetValue(&grid[i], (char)first_val, 1);
+        return 1;
+      }
     }
   }
   return 0;
@@ -618,41 +648,44 @@ void back_play(Grid grid) {
   history_index = affectation;
 }
 
-
-static void deduce_until_stable(void) {
+void deduce_until_stable(Grid grid) {
   char modified;
   do {
     modified = 0;
-    if (clean_grid())            modified = 1;
-    if (solveNakedSingles())   modified = 1;
-    if (solve_hidden_singles())  modified = 1;
+    modified |= clean_grid(grid);
+    modified |= solveNakedSingles(grid);
+    modified |= solve_hidden_singles(grid);
+    modified |= clean_naked_pairs(grid);
+    modified |= clean_naked_pairs(grid);
+    modified |= clean_hidden_pairs(grid);
+    modified |= clean_naked_triples(grid);
+    modified |= clean_hidden_triples(grid);
   } while (modified);
 }
 
-
-static char has_pending_supposition(void) {
+char has_pending_supposition() {
   for (int i = history_index - 1; i >= 0; i--)
-    if (history[i].supposed) return 1;
+    if (history[i].supposed)
+      return 1;
   return 0;
 }
 
-char solve(void) {
+char solve(Grid grid) {
   while (1) {
-    deduce_until_stable();
+    deduce_until_stable(grid);
 
-    if (!is_grid_valid()) {
+    if (!is_grid_valid(grid)) {
 
       if (!has_pending_supposition())
         return 0;
-      back_play();
+      back_play(grid);
       continue;
     }
 
-    if (grid_filled_count() == GRID_SIZE)
+    if (grid_filled_count(grid) == GRID_SIZE)
       return 1;
 
-
-    if (!guess_value())
+    if (!guess_value(grid))
       return 0;
   }
 }
