@@ -4,6 +4,7 @@
 #define TILES_PER_LINE 9
 
 #include "../subset/subset.h"
+#include "../sudoku_types/type_history.h"
 #include "../sudoku_types/type_subset.h"
 #include "../sudoku_types/type_sudokutile.h"
 #include "solver.h"

@@ -9,7 +9,7 @@ typedef struct Affectation {
   char value;
 } Affectation;
 
-Affectation history[81];
-int history_index;
+extern Affectation history[81];
+extern int history_index;
 
 #endif /* TYPE_HISTORY_H */

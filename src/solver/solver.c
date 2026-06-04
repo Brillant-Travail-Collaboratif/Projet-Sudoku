@@ -538,3 +538,39 @@ char clean_hidden_triples(Grid grid) {
     return 0;
   return apply_rule_on_grid(grid, clean_hidden_triples_in_subset);
 }
+
+void play_back(Grid grid) {
+  if (grid == NULL || history_index <= 0)
+    return;
+
+  int affectation = history_index - 1;
+  while (affectation >= 0 && history[affectation].supposed == 0)
+    affectation--;
+
+  if (affectation < 0)
+    return;
+
+  SudokuTile *guessedTile = history[affectation].tile;
+  unsigned char guessedValue = history[affectation].value;
+
+  for (int index = affectation; index < history_index; index++) {
+    history[index].tile->value = 0;
+  }
+
+  for (unsigned char tile = 0; tile < NUMBER_OF_TILE_IN_A_GRID; tile++) {
+    if (grid[tile].value == 0) {
+      for (unsigned char possible = 0; possible < NUMBER_OF_POSSIBLE;
+           possible++) {
+        grid[tile].possible[possible] = 1;
+      }
+    }
+  }
+
+  clean_grid(grid);
+
+  if (guessedTile != NULL && guessedValue >= 1 &&
+      guessedValue <= NUMBER_OF_POSSIBLE)
+    guessedTile->possible[guessedValue - 1] = 0;
+
+  history_index = affectation;
+}

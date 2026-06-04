@@ -58,6 +58,8 @@ char tileSetValue(SudokuTile *tile, char value, unsigned char supposed) {
 
   tile->value = value;
 
+  if (history_index > 80)
+    return 1;
   history[history_index].tile = tile;
   history[history_index].value = value;
   history[history_index++].supposed = supposed;
