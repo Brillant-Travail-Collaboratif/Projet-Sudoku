@@ -1,5 +1,4 @@
 #include "display_internal.h"
-#include <ncurses.h>
 
 void displayFinal(Grid grid) {
   clear();
@@ -101,5 +100,37 @@ void req_start_grid(Grid grid) {
     printw("Press q to quit\n");
     refresh();
     move(mvy, mvx);
+  }
+}
+void dispSubset(Subset s) {
+  if (s == NULL) {
+    printf("(subset NULL)\n");
+    return;
+  }
+
+  printf("+---+---+---+---+---+---+---+---+---+\n| ");
+  for (unsigned char i = 0; i < GRID_SIDE; i++) {
+    const char value = s[i]->value;
+    printf("%c | ", value == 0 ? '.' : (char)('0' + value));
+  }
+  printf("\n+---+---+---+---+---+---+---+---+---+\n");
+
+  for (unsigned char i = 0; i < GRID_SIDE; i++) {
+    printf("  case %u : ", i);
+    if (s[i]->value != 0) {
+      printf("valeur %c\n", (char)('0' + s[i]->value));
+    } else {
+      printf("candidats ");
+      char first = 1;
+      for (unsigned char d = 0; d < GRID_SIDE; d++) {
+        if (s[i]->possible[d]) {
+          printf("%s%u", first ? "" : ",", d + 1);
+          first = 0;
+        }
+      }
+      if (first)
+        printf("(aucun)");
+      printf("\n");
+    }
   }
 }
