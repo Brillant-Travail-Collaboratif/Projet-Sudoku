@@ -42,13 +42,14 @@ char *gridGetPossibleXY(Grid grid, unsigned char x, unsigned char y) {
   return tileGetPossible(&grid[(y - 1) * 9 + (x - 1)]);
 }
 
-char gridSetValueXY(Grid grid, unsigned char x, unsigned char y, char value) {
+char gridSetValueXY(Grid grid, unsigned char x, unsigned char y, char value,
+                    unsigned char supposed) {
   if (grid == NULL || x > NUMBER_OF_TILE_IN_A_GRID / 2 ||
       y > NUMBER_OF_TILE_IN_A_GRID / 2) {
     return 1;
   }
 
-  return tileSetValue(&grid[(y - 1) * 9 + (x - 1)], value);
+  return tileSetValue(&grid[(y - 1) * 9 + (x - 1)], value, supposed);
 }
 char gridSetPossibleXY(Grid grid, unsigned char x, unsigned char y,
                        char possible[NUMBER_OF_POSSIBLE]) {
