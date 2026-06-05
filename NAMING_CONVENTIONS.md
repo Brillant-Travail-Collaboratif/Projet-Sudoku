@@ -12,7 +12,7 @@ This document outlines the naming conventions for the SUDOKU project. All code m
 
 ## Functions
 
-**Rule**: All function names must start with a **verb** and use **camelCase**
+**Rule**: All function names must start with a **verb** and use **snake_case**
 
 ### Examples
 

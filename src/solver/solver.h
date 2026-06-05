@@ -10,9 +10,9 @@
 extern Affectation history[GRID_SIZE];
 
 char solve_hidden_singles_in_line(SudokuTile *line);
-char solveNakedSingles(Grid grid);
-char cleanLine(SudokuTile *line);
-char cleanSubset(Subset s);
+char solve_naked_singles(Grid grid);
+char clean_line(SudokuTile *line);
+char clean_subset(Subset s);
 char clean_grid(Grid grid);
 char solve_hidden_singles(Grid grid);
 char clean_hidden_pairs(Grid grid);

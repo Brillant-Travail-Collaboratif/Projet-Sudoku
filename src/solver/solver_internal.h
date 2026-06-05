@@ -11,9 +11,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-unsigned char countCandidates(const SudokuTile *tile, char *candidate);
-void fixTileValue(SudokuTile *tile, char value);
-char removeCandidate(SudokuTile *tile, char value);
+unsigned char count_candidates(const SudokuTile *tile, char *candidate);
+char remove_tile_possible(SudokuTile *tile, char value);
 char solveHiddenSinglesInSubset(Subset s);
 char clean_hidden_pairs_in_subset(Subset subset);
 

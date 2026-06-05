@@ -14,15 +14,15 @@ int main(int argc, char **argv) {
   noecho();
   keypad(stdscr, TRUE);
 
-  Grid grid = loadSudokuFromFile("../doc/intermediate_table_1.txt");
+  Grid grid = load_sudoku_from_file("../doc/expert_table_1.txt");
 
-  req_start_grid(grid);
+  start_grid_tui(grid);
 
   solve(grid);
 
-  displayFinal(grid);
+  display_values(grid);
 
-  deleteGrid(grid);
+  delete_grid(grid);
   refresh();
   getch();
   endwin();

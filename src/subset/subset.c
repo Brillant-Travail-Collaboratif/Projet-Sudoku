@@ -4,14 +4,14 @@
 
 #include "subset_internal.h"
 
-Subset allocateSubset(void) {
+Subset allocate_subset(void) {
   return malloc(sizeof(SudokuTile *) * SUBSET_SIZE);
 }
-Subset getLineSubset(Grid grid, int n) {
+Subset get_line_subset(Grid grid, int n) {
   if (grid == NULL || n < 0 || n >= SUBSET_SIZE)
     return NULL;
 
-  Subset subset = allocateSubset();
+  Subset subset = allocate_subset();
   if (subset == NULL)
     return NULL;
 
@@ -21,11 +21,11 @@ Subset getLineSubset(Grid grid, int n) {
   return subset;
 }
 
-Subset getColSubset(Grid grid, int n) {
+Subset get_col_subset(Grid grid, int n) {
   if (grid == NULL || n < 0 || n >= SUBSET_SIZE)
     return NULL;
 
-  Subset subset = allocateSubset();
+  Subset subset = allocate_subset();
   if (subset == NULL)
     return NULL;
 
@@ -35,16 +35,16 @@ Subset getColSubset(Grid grid, int n) {
   return subset;
 }
 
-void deleteSubset(Subset subset) {
+void delete_subset(Subset subset) {
   if (subset != NULL)
     free(subset);
 }
 
-Subset getSubsqSubset(Grid grid, int n) {
+Subset get_subsq_subset(Grid grid, int n) {
   if (grid == NULL || n < 0 || n >= SUBSET_SIZE)
     return NULL;
 
-  Subset subset = allocateSubset();
+  Subset subset = allocate_subset();
   if (subset == NULL)
     return NULL;
 
@@ -64,16 +64,16 @@ Subset getSubsqSubset(Grid grid, int n) {
   return subset;
 }
 
-void freeAllSubsets(AllSubsets *all) {
+void free_all_subsets(AllSubsets *all) {
   if (all == NULL)
     return;
   for (int i = 0; i < SUBSET_COUNT; i++) {
-    deleteSubset(all->subsets[i]);
+    delete_subset(all->subsets[i]);
     all->subsets[i] = NULL;
   }
 }
 
-char buildAllSubsets(Grid grid, AllSubsets *all) {
+char build_all_subsets(Grid grid, AllSubsets *all) {
   if (grid == NULL || all == NULL)
     return 1;
 
@@ -81,14 +81,14 @@ char buildAllSubsets(Grid grid, AllSubsets *all) {
     all->subsets[i] = NULL;
 
   for (int n = 0; n < SUBSET_SIZE; n++) {
-    all->subsets[n] = getLineSubset(grid, n);       /*  0..8  : lignes      */
-    all->subsets[9 + n] = getColSubset(grid, n);    /*  9..17 : colonnes    */
-    all->subsets[18 + n] = getSubsqSubset(grid, n); /* 18..26 : sous-carres */
+    all->subsets[n] = get_line_subset(grid, n);       /*  0..8  : lignes      */
+    all->subsets[9 + n] = get_col_subset(grid, n);    /*  9..17 : colonnes    */
+    all->subsets[18 + n] = get_subsq_subset(grid, n); /* 18..26 : sous-carres */
   }
 
   for (int i = 0; i < SUBSET_COUNT; i++) {
     if (all->subsets[i] == NULL) {
-      freeAllSubsets(all);
+      free_all_subsets(all);
       return 1;
     }
   }

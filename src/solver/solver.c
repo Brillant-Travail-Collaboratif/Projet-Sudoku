@@ -2,7 +2,7 @@
 #include "solver_internal.h"
 #include <stddef.h>
 
-unsigned char countCandidates(const SudokuTile *tile, char *candidate) {
+unsigned char count_candidates(const SudokuTile *tile, char *candidate) {
   unsigned char count = 0;
   for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++) {
     if (tile->possible[d]) {
@@ -13,15 +13,7 @@ unsigned char countCandidates(const SudokuTile *tile, char *candidate) {
   return count;
 }
 
-void fixTileValue(SudokuTile *tile, char value) {
-  if (tileSetValue(tile, value, 0) != 0)
-    return;
-  for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++)
-    tile->possible[d] = 0;
-  tile->possible[value - 1] = 1;
-}
-
-char solveNakedSingles(Grid grid) {
+char solve_naked_singles(Grid grid) {
   if (grid == NULL)
     return 0;
 
@@ -32,9 +24,9 @@ char solveNakedSingles(Grid grid) {
       continue;
 
     char candidate = 0;
-    const unsigned char count = countCandidates(&grid[i], &candidate);
+    const unsigned char count = count_candidates(&grid[i], &candidate);
     if (count == 1) {
-      fixTileValue(&grid[i], candidate);
+      set_tile_value(&grid[i], candidate, 0);
       modified = 1;
     }
   }
@@ -62,7 +54,7 @@ char solveHiddenSinglesInSubset(Subset subset) {
       }
     }
     if (!alreadyPlaced && count == 1) {
-      fixTileValue(subset[target], j);
+      set_tile_value(subset[target], j, 0);
       modified = 1;
     }
   }
@@ -77,7 +69,7 @@ char solve_hidden_singles(Grid grid) {
   if (all == NULL)
     return 0;
 
-  if (buildAllSubsets(grid, all) != 0) {
+  if (build_all_subsets(grid, all) != 0) {
     free(all);
     return 0;
   }
@@ -89,12 +81,12 @@ char solve_hidden_singles(Grid grid) {
       modified = 1;
   }
 
-  freeAllSubsets(all);
+  free_all_subsets(all);
   free(all);
   return modified;
 }
 
-char removeCandidate(SudokuTile *tile, char value) {
+char remove_tile_possible(SudokuTile *tile, char value) {
   if (tile->possible[value - 1]) {
     tile->possible[value - 1] = 0;
     return 1;
@@ -102,7 +94,7 @@ char removeCandidate(SudokuTile *tile, char value) {
   return 0;
 }
 
-char cleanLine(SudokuTile *line) {
+char clean_line(SudokuTile *line) {
   if (line == NULL)
     return 0;
 
@@ -118,14 +110,14 @@ char cleanLine(SudokuTile *line) {
         continue;
       if (line[j].value != 0)
         continue;
-      if (removeCandidate(&line[j], value))
+      if (remove_tile_possible(&line[j], value))
         modified = 1;
     }
   }
   return modified;
 }
 
-char cleanSubset(Subset s) {
+char clean_subset(Subset s) {
   if (s == NULL)
     return 0;
 
@@ -140,7 +132,7 @@ char cleanSubset(Subset s) {
         continue;
       if (s[j]->value != 0)
         continue;
-      if (removeCandidate(s[j], value))
+      if (remove_tile_possible(s[j], value))
         modified = 1;
     }
   }
@@ -154,7 +146,7 @@ char solve_hidden_singles_in_line(SudokuTile *line) {
   for (unsigned char i = 0; i < NUMBER_OF_POSSIBLE; i++) {
     unsigned char localisationOfCandidate = 0;
     for (unsigned char j = 0; j < NUMBER_OF_POSSIBLE; j++) {
-      char *possible = tileGetPossible(&line[j]);
+      char *possible = get_tile_possibles(&line[j]);
       if (possible == NULL)
         continue;
       char candidateValue = possible[i];
@@ -166,7 +158,7 @@ char solve_hidden_singles_in_line(SudokuTile *line) {
       }
     }
     if (localisationOfCandidate != 0) {
-      tileSetValue(&line[localisationOfCandidate], i + 1, 0);
+      set_tile_value(&line[localisationOfCandidate], i + 1, 0);
       modified = 1;
     }
   }
@@ -181,7 +173,7 @@ char clean_grid(Grid grid) {
   if (all == NULL)
     return 0;
 
-  if (buildAllSubsets(grid, all) != 0) {
+  if (build_all_subsets(grid, all) != 0) {
     free(all);
     return 0;
   }
@@ -189,11 +181,11 @@ char clean_grid(Grid grid) {
   unsigned char modified = 0;
 
   for (unsigned char i = 0; i < SUBSET_COUNT; i++) {
-    if (cleanSubset(all->subsets[i]) != 0)
+    if (clean_subset(all->subsets[i]) != 0)
       modified = 1;
   }
 
-  freeAllSubsets(all);
+  free_all_subsets(all);
   free(all);
   return modified;
 }
@@ -206,7 +198,7 @@ char apply_rule_on_grid(Grid grid, char (*rule)(Subset)) {
   AllSubsets *all = malloc(sizeof(AllSubsets));
   if (all == NULL)
     return 0;
-  if (buildAllSubsets(grid, all) != 0) {
+  if (build_all_subsets(grid, all) != 0) {
     free(all);
     return 0;
   }
@@ -215,7 +207,7 @@ char apply_rule_on_grid(Grid grid, char (*rule)(Subset)) {
     if (rule(all->subsets[i]))
       modified = 1;
   }
-  freeAllSubsets(all);
+  free_all_subsets(all);
   free(all);
   return modified;
 }
@@ -258,9 +250,9 @@ char clean_naked_pair_in_subset(Subset s) {
       for (unsigned char k = 0; k < TILES_PER_LINE; k++) {
         if (k == i || k == j || s[k]->value != 0)
           continue;
-        if (removeCandidate(s[k], ci[0]))
+        if (remove_tile_possible(s[k], ci[0]))
           modified = 1;
-        if (removeCandidate(s[k], ci[1]))
+        if (remove_tile_possible(s[k], ci[1]))
           modified = 1;
       }
     }
@@ -406,7 +398,7 @@ char clean_naked_triple_in_subset(Subset s) {
           if (l == i || l == j || l == k || s[l]->value != 0)
             continue;
           for (int a = 0; a < union_size; a++)
-            if (removeCandidate(s[l], union_vals[a]))
+            if (remove_tile_possible(s[l], union_vals[a]))
               modified = 1;
         }
       }
@@ -578,7 +570,7 @@ char is_grid_valid(Grid grid) {
   AllSubsets *all = malloc(sizeof(AllSubsets));
   if (all == NULL)
     return 1; /* en cas de OOM, ne pas mentir : autorise */
-  if (buildAllSubsets(grid, all) != 0) {
+  if (build_all_subsets(grid, all) != 0) {
     free(all);
     return 1;
   }
@@ -589,14 +581,14 @@ char is_grid_valid(Grid grid) {
       if (v == 0)
         continue;
       if (seen[v - 1]) {
-        freeAllSubsets(all);
+        free_all_subsets(all);
         free(all);
         return 0;
       }
       seen[v - 1] = 1;
     }
   }
-  freeAllSubsets(all);
+  free_all_subsets(all);
   free(all);
   return 1;
 }
@@ -618,7 +610,7 @@ char guess_value(Grid grid) {
 
     if (count == 2) {
 
-      tileSetValue(&grid[i], (char)first_val, 1);
+      set_tile_value(&grid[i], (char)first_val, 1);
       return 1;
     }
   }
@@ -666,7 +658,7 @@ void deduce_until_stable(Grid grid) {
   do {
     modified = 0;
     modified |= clean_grid(grid);
-    modified |= solveNakedSingles(grid);
+    modified |= solve_naked_singles(grid);
     modified |= solve_hidden_singles(grid);
     modified |= clean_naked_pairs(grid);
     modified |= clean_naked_pairs(grid);
