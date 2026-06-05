@@ -45,3 +45,5 @@ target_link_libraries(Projet_Sudoku PRIVATE ${CURSES_LIBRARIES})
 
 add_test(NAME valgrind_test
         COMMAND valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./Projet_Sudoku)
+
+enable_testing()

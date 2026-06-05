@@ -14,6 +14,7 @@ Grid loadSudokuFromFile(const char *filename) {
   char buffer[256];
   for (unsigned char row = 0; row < 9; row++) {
     if (fgets(buffer, sizeof(buffer), file) == NULL) {
+      deleteGrid(grid);
       fclose(file);
       return NULL;
     }
@@ -37,7 +38,7 @@ int saveSudokuToFile(const char *filename, Grid grid) {
     return -1;
   for (unsigned char row = 0; row < 9; row++) {
     for (unsigned char column = 0; column < 9; column++) {
-      int value = gridGetValueXY(grid, column, row);
+      int value = gridGetValueXY(grid, column + 1, row + 1);
       if (value == 0)
         fprintf(file, "?");
       else
