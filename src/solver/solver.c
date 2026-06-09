@@ -594,24 +594,25 @@ char is_grid_valid(Grid grid) {
 }
 
 char guess_value(Grid grid) {
-  for (int i = 0; i < GRID_SIZE; i++) {
-    if (grid[i].value != 0)
-      continue;
+  for (int expected_count = 2; expected_count <= GRID_SIDE; expected_count++) {
+    for (int i = 0; i < GRID_SIZE; i++) {
+      if (grid[i].value != 0)
+        continue;
 
-    int count = 0;
-    int first_val = -1;
-    for (int d = 0; d < GRID_SIDE; d++) {
-      if (grid[i].possible[d]) {
-        count++;
-        if (first_val == -1)
-          first_val = d + 1;
+      int count = 0;
+      int first_val = -1;
+      for (int d = 0; d < GRID_SIDE; d++) {
+        if (grid[i].possible[d]) {
+          count++;
+          if (first_val == -1)
+            first_val = d + 1;
+        }
       }
-    }
 
-    if (count == 2) {
-
-      set_tile_value(&grid[i], (char)first_val, 1);
-      return 1;
+      if (count == expected_count) {
+        set_tile_value(&grid[i], (char)first_val, 1);
+        return 1;
+      }
     }
   }
   return 0;

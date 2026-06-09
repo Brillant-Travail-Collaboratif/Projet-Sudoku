@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
   noecho();
   keypad(stdscr, TRUE);
 
-  Grid grid = load_sudoku_from_file("../doc/expert_table_1.txt");
+  Grid grid = load_sudoku_from_file("../tables/expert_table_1.txt");
 
   start_grid_tui(grid);
 
