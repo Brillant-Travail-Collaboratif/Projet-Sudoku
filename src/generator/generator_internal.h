@@ -2,11 +2,11 @@
 #define GENERATOR_INTERNAL_H
 
 #include "../grid/grid.h"
-#include "../sudoku_types/type_difficulty.h"
 #include "../solver/solver.h"
+#include "../sudoku_types/type_difficulty.h"
+#include "difficulty.h"
 #include "generator.h"
 #include "random.h"
-#include "difficulty.h"
 #include <limits.h>
 #include <stddef.h>
 #include <stdint.h>

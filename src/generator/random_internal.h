@@ -3,6 +3,6 @@
 
 #include "random.h"
 
-uint32_t generator_random_next(GeneratorRandom *random) ;
+uint32_t generator_random_next(GeneratorRandom *random);
 
 #endif /* RANDOM_INTERNAL_H */

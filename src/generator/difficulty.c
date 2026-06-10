@@ -85,6 +85,4 @@ char matches_difficulty(Grid puzzle, Difficulty difficulty) {
   return 1;
 }
 
-int removed_count(Grid grid) {
-  return GRID_SIZE - grid_filled_count(grid);
-}
+int removed_count(Grid grid) { return GRID_SIZE - grid_filled_count(grid); }

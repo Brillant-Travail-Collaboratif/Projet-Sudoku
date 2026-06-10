@@ -98,8 +98,7 @@ char solution_matches_completed_grid(Grid puzzle, Grid completed) {
   return ok;
 }
 
-char count_solutions(Grid grid, int index, int *count,
-                            Grid first_solution) {
+char count_solutions(Grid grid, int index, int *count, Grid first_solution) {
   if (*count > 1)
     return 1;
 
@@ -158,7 +157,7 @@ int target_removed_count(Difficulty difficulty, GeneratorRandom *random) {
 }
 
 Grid build_candidate_puzzle(Grid completed, Difficulty difficulty,
-                                   GeneratorRandom *random) {
+                            GeneratorRandom *random) {
   Grid puzzle = clone_grid_values(completed);
   if (puzzle == NULL)
     return NULL;
