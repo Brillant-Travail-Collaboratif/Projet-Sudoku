@@ -8,7 +8,7 @@ Subset allocate_subset(void) {
   return malloc(sizeof(SudokuTile *) * SUBSET_SIZE);
 }
 Subset get_line_subset(Grid grid, int n) {
-  if (grid == NULL || n < 0 || n >= SUBSET_SIZE)
+  if (grid == NULL || grid->allTiles == NULL || n < 0 || n >= SUBSET_SIZE)
     return NULL;
 
   Subset subset = allocate_subset();
@@ -16,13 +16,13 @@ Subset get_line_subset(Grid grid, int n) {
     return NULL;
 
   for (int k = 0; k < SUBSET_SIZE; k++)
-    subset[k] = &grid[n * SUBSET_SIZE + k];
+    subset[k] = &grid->allTiles[n * SUBSET_SIZE + k];
 
   return subset;
 }
 
 Subset get_col_subset(Grid grid, int n) {
-  if (grid == NULL || n < 0 || n >= SUBSET_SIZE)
+  if (grid == NULL || grid->allTiles == NULL || n < 0 || n >= SUBSET_SIZE)
     return NULL;
 
   Subset subset = allocate_subset();
@@ -30,7 +30,7 @@ Subset get_col_subset(Grid grid, int n) {
     return NULL;
 
   for (int k = 0; k < SUBSET_SIZE; k++)
-    subset[k] = &grid[k * SUBSET_SIZE + n];
+    subset[k] = &grid->allTiles[k * SUBSET_SIZE + n];
 
   return subset;
 }
@@ -41,7 +41,7 @@ void delete_subset(Subset subset) {
 }
 
 Subset get_subsq_subset(Grid grid, int n) {
-  if (grid == NULL || n < 0 || n >= SUBSET_SIZE)
+  if (grid == NULL || grid->allTiles == NULL || n < 0 || n >= SUBSET_SIZE)
     return NULL;
 
   Subset subset = allocate_subset();
@@ -57,7 +57,7 @@ Subset get_subsq_subset(Grid grid, int n) {
     for (unsigned char j = 0; j < BOX_SIDE; j++) {
       unsigned char row = boxRow + i;
       unsigned char col = boxCol + j;
-      subset[i * BOX_SIDE + j] = &grid[row * SUBSET_SIZE + col];
+      subset[i * BOX_SIDE + j] = &grid->allTiles[row * SUBSET_SIZE + col];
     }
   }
 
@@ -73,12 +73,12 @@ void free_all_subsets(AllSubsets *all) {
   }
 }
 
-char build_all_subsets(Grid grid, AllSubsets *all) {
-  if (grid == NULL || all == NULL)
+char build_all_subsets(Grid grid) {
+  if (grid == NULL || grid->allTiles == NULL)
     return 1;
 
-  for (int i = 0; i < SUBSET_COUNT; i++)
-    all->subsets[i] = NULL;
+  AllSubsets *all = &grid->allSubsets;
+  free_all_subsets(all);
 
   for (int n = 0; n < SUBSET_SIZE; n++) {
     all->subsets[n] = get_line_subset(grid, n);       /*  0..8  : lignes      */

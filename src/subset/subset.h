@@ -4,12 +4,6 @@
 #include "../sudoku_types/type_grid.h"
 #include "../sudoku_types/type_subset.h"
 
-#define SUBSET_COUNT 27
-
-typedef struct {
-  Subset subsets[SUBSET_COUNT];
-} AllSubsets;
-
 /*
  * get_line_subset : sous-ensemble correspondant a la ligne n (0..8).
  */
@@ -32,7 +26,7 @@ Subset get_subsq_subset(Grid grid, int n);
  */
 void delete_subset(Subset subset);
 
-char build_all_subsets(Grid grid, AllSubsets *all);
+char build_all_subsets(Grid grid);
 
 void free_all_subsets(AllSubsets *all);
 

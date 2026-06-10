@@ -5,8 +5,6 @@
 #include "../sudoku_types/type_history.h"
 #include "../sudoku_types/type_sudokutile.h"
 
-extern SudokuTile grid[GRID_SIZE];
-
 Grid create_grid();
 void delete_grid(Grid grid);
 char get_grid_value_xy(Grid grid, unsigned char x, unsigned char y);
