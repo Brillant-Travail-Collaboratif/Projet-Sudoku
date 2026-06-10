@@ -38,7 +38,10 @@ add_executable(Projet_Sudoku
         src/io/display_internal.h
         src/subset/subset.c
         src/subset/subset.h
-        src/main.c)
+        src/main.c
+        src/generator/generator.c
+        src/generator/generator.h
+        src/generator/generator_internal.h)
 
 target_include_directories(Projet_Sudoku PRIVATE ${CURSES_INCLUDE_DIR})
 target_link_libraries(Projet_Sudoku PRIVATE ${CURSES_LIBRARIES})
