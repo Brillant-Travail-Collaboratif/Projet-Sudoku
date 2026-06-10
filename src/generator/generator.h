@@ -1,18 +1,11 @@
-//
-// Created by Nicolas Gouaux on 10/06/2026.
-//
+#ifndef GENERATOR_H
+#define GENERATOR_H
 
-#ifndef PROJET_SUDOKU_GENERATOR_H
-#define PROJET_SUDOKU_GENERATOR_H
+#include "../grid/grid.h"
+#include "../sudoku_types/type_difficulty.h"
 
-#include "../sudoku_types/type_grid.h"
+Grid generate_sudoku(Difficulty difficulty, unsigned int seed);
+char parse_difficulty(const char *text, Difficulty *difficulty);
+const char *difficulty_to_string(Difficulty difficulty);
 
-
-
-
-
-char generate_grid();
-
-
-
-#endif //PROJET_SUDOKU_GENERATOR_H
+#endif /* GENERATOR_H */

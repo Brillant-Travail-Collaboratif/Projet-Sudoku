@@ -7,10 +7,14 @@
 
 Grid create_grid();
 void delete_grid(Grid grid);
+Grid clone_grid_values(Grid grid);
+void reset_grid_candidates(Grid grid);
 char get_grid_value_xy(Grid grid, unsigned char x, unsigned char y);
 char *get_grid_possibles_xy(Grid grid, unsigned char x, unsigned char y);
 char set_grid_value_xy(Grid grid, unsigned char x, unsigned char y, char value,
                        unsigned char supposed);
+char set_grid_value_raw(Grid grid, unsigned char x, unsigned char y,
+                        char value);
 char set_grid_possibles_xy(Grid grid, unsigned char x, unsigned char y,
                            char possible[NUMBER_OF_POSSIBLE]);
 

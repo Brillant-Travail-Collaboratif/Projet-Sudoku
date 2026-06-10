@@ -577,6 +577,23 @@ char guess_value(Grid grid) {
   return 0;
 }
 
+void solver_reset_history(void) {
+  for (int i = 0; i < GRID_SIZE; i++) {
+    history[i].tile = NULL;
+    history[i].supposed = 0;
+    history[i].value = 0;
+  }
+  history_index = 0;
+}
+
+int solver_count_history_suppositions(void) {
+  int count = 0;
+  for (int i = 0; i < history_index; i++)
+    if (history[i].supposed)
+      count++;
+  return count;
+}
+
 void back_play(Grid grid) {
   if (grid == NULL || history_index <= 0)
     return;
@@ -635,7 +652,7 @@ char has_pending_supposition() {
   return 0;
 }
 
-static int filled_count(Grid grid) {
+int filled_count(Grid grid) {
   int c = 0;
   for (int i = 0; i < NUMBER_OF_TILE_IN_A_GRID; i++)
     if (grid->allTiles[i].value != 0)
@@ -643,9 +660,14 @@ static int filled_count(Grid grid) {
   return c;
 }
 
-char solve(Grid grid) {
+char solve_counting(Grid grid, int *supposition_count) {
   if (grid == NULL)
     return 0;
+  solver_reset_history();
+  reset_grid_candidates(grid);
+  if (supposition_count != NULL)
+    *supposition_count = 0;
+
   while (1) {
     deduce_until_stable(grid);
 
@@ -661,5 +683,15 @@ char solve(Grid grid) {
 
     if (!guess_value(grid))
       return 0;
+    if (supposition_count != NULL)
+      (*supposition_count)++;
   }
+}
+
+char solve(Grid grid) { return solve_counting(grid, NULL); }
+
+char solve_with_stats(Grid grid, int *supposition_count) {
+  char solved = solve_counting(grid, supposition_count);
+  solver_reset_history();
+  return solved;
 }

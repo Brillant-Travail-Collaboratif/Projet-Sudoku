@@ -32,7 +32,10 @@ char is_grid_valid(Grid grid);
 char guess_value(Grid grid);
 
 void back_play(Grid grid);
+void solver_reset_history(void);
+int solver_count_history_suppositions(void);
 
 char solve(Grid grid);
+char solve_with_stats(Grid grid, int *supposition_count);
 
 #endif /* SOLVER_H */
