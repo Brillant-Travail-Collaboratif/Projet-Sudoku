@@ -4,9 +4,9 @@
 #include "../grid/grid.h"
 #include "../sudoku_types/type_subset.h"
 
-void displayFinal(Grid grid);
-void displayPossible(Grid grid);
-void req_start_grid(Grid grid);
-void dispSubset(Subset s);
+void display_values(Grid grid);
+void display_possibles(Grid grid);
+void start_grid_tui(Grid grid);
+void display_subset(Subset s);
 
 #endif /* DISPLAY_H */

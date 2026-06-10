@@ -1,3 +1,4 @@
+#include "grid/grid.h"
 #include "io/display.h"
 #include "io/read.h"
 #include "solver/solver.h"
@@ -5,21 +6,27 @@
 #include <ncurses.h>
 
 int main(int argc, char **argv) {
-  initscr();
+  SCREEN *screen = newterm(NULL, stdout, stdin);
+  if (screen == NULL)
+    return 1;
+  set_term(screen);
   cbreak();
   noecho();
   keypad(stdscr, TRUE);
 
-  Grid grid = loadSudokuFromFile("../doc/intermediate_table_1.txt");
+  Grid grid = load_sudoku_from_file("../tables/expert_table_1.txt");
 
-  req_start_grid(grid);
+  start_grid_tui(grid);
 
   solve(grid);
 
-  displayFinal(grid);
+  display_values(grid);
 
+  delete_grid(grid);
+  refresh();
   getch();
   endwin();
+  delscreen(screen);
   if (argc && argv)
     return 0;
   return 0;

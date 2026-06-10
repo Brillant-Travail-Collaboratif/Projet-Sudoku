@@ -1,71 +1,88 @@
 #include "grid_internal.h"
 
-Grid createGrid() {
-  Grid grid = malloc(sizeof(SudokuTile) * NUMBER_OF_TILE_IN_A_GRID);
+Grid create_grid() {
+  Grid grid = malloc(sizeof(GridData));
   if (grid == NULL)
     return NULL;
+
+  grid->allTiles = malloc(sizeof(SudokuTile) * NUMBER_OF_TILE_IN_A_GRID);
+  if (grid->allTiles == NULL) {
+    free(grid);
+    return NULL;
+  }
+
+  for (int i = 0; i < SUBSET_COUNT; i++)
+    grid->allSubsets.subsets[i] = NULL;
 
   char possible[NUMBER_OF_POSSIBLE];
   for (unsigned char i = 0; i < NUMBER_OF_POSSIBLE; i++) {
     possible[i] = 1;
   }
   for (unsigned char i = 0; i < NUMBER_OF_TILE_IN_A_GRID; i++) {
-    SudokuTile *newTile = createTile(0, possible);
-    grid[i] = *newTile;
+    grid->allTiles[i].value = 0;
+    for (unsigned char j = 0; j < NUMBER_OF_POSSIBLE; j++)
+      grid->allTiles[i].possible[j] = possible[j];
+  }
+
+  if (build_all_subsets(grid) != 0) {
+    free(grid->allTiles);
+    free(grid);
+    return NULL;
   }
 
   return grid;
 }
 
-void deleteGrid(Grid grid) {
+void delete_grid(Grid grid) {
   if (grid == NULL)
     return;
-  for (unsigned char i = 0; i < NUMBER_OF_TILE_IN_A_GRID; i++) {
-    deleteTile(&grid[i]);
-  }
+  free_all_subsets(&grid->allSubsets);
+  free(grid->allTiles);
   free(grid);
 }
 
-char gridGetValueXY(Grid grid, unsigned char x, unsigned char y) {
-  if (grid == NULL || x > NUMBER_OF_TILE_IN_A_GRID / 2 ||
-      y > NUMBER_OF_TILE_IN_A_GRID / 2)
+char get_grid_value_xy(Grid grid, unsigned char x, unsigned char y) {
+  if (grid == NULL || grid->allTiles == NULL || x < 1 || x > 9 || y < 1 ||
+      y > 9)
     return 0;
 
-  return tileGetValue(&grid[(y - 1) * 9 + (x - 1)]);
+  return get_tile_value(&grid->allTiles[(y - 1) * 9 + (x - 1)]);
 }
 
-char *gridGetPossibleXY(Grid grid, unsigned char x, unsigned char y) {
-  if (grid == NULL || x > NUMBER_OF_TILE_IN_A_GRID / 2 ||
-      y > NUMBER_OF_TILE_IN_A_GRID / 2)
+char *get_grid_possibles_xy(Grid grid, unsigned char x, unsigned char y) {
+  if (grid == NULL || grid->allTiles == NULL || x < 1 || x > 9 || y < 1 ||
+      y > 9)
     return NULL;
 
-  return tileGetPossible(&grid[(y - 1) * 9 + (x - 1)]);
+  return get_tile_possibles(&grid->allTiles[(y - 1) * 9 + (x - 1)]);
 }
 
-char gridSetValueXY(Grid grid, unsigned char x, unsigned char y, char value,
-                    unsigned char supposed) {
-  if (grid == NULL || x > NUMBER_OF_TILE_IN_A_GRID / 2 ||
-      y > NUMBER_OF_TILE_IN_A_GRID / 2) {
+char set_grid_value_xy(Grid grid, unsigned char x, unsigned char y, char value,
+                       unsigned char supposed) {
+  if (grid == NULL || grid->allTiles == NULL || x < 1 || x > 9 || y < 1 ||
+      y > 9) {
     return 1;
   }
 
-  return tileSetValue(&grid[(y - 1) * 9 + (x - 1)], value, supposed);
+  return set_tile_value(&grid->allTiles[(y - 1) * 9 + (x - 1)], value,
+                        supposed);
 }
-char gridSetPossibleXY(Grid grid, unsigned char x, unsigned char y,
-                       char possible[NUMBER_OF_POSSIBLE]) {
-  if (grid == NULL || x > NUMBER_OF_TILE_IN_A_GRID / 2 ||
-      y > NUMBER_OF_TILE_IN_A_GRID / 2)
+
+char set_grid_possibles_xy(Grid grid, unsigned char x, unsigned char y,
+                           char possible[NUMBER_OF_POSSIBLE]) {
+  if (grid == NULL || grid->allTiles == NULL || x < 1 || x > 9 || y < 1 ||
+      y > 9)
     return 1;
 
-  return tileSetPossible(&grid[(y - 1) * 9 + (x - 1)], possible);
+  return set_tile_possibles(&grid->allTiles[(y - 1) * 9 + (x - 1)], possible);
 }
 
 int grid_filled_count(Grid grid) {
-  if (grid == NULL)
+  if (grid == NULL || grid->allTiles == NULL)
     return 0;
   int count = 0;
   for (int i = 0; i < GRID_SIZE; i++)
-    if (grid[i].value != 0)
+    if (grid->allTiles[i].value != 0)
       count++;
   return count;
 }

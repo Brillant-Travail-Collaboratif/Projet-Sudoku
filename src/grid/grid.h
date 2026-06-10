@@ -5,16 +5,14 @@
 #include "../sudoku_types/type_history.h"
 #include "../sudoku_types/type_sudokutile.h"
 
-extern SudokuTile grid[GRID_SIZE];
-
-Grid createGrid();
-void deleteGrid(Grid grid);
-char gridGetValueXY(Grid grid, unsigned char x, unsigned char y);
-char *gridGetPossibleXY(Grid grid, unsigned char x, unsigned char y);
-char gridSetValueXY(Grid grid, unsigned char x, unsigned char y, char value,
-                    unsigned char supposed);
-char gridSetPossibleXY(Grid grid, unsigned char x, unsigned char y,
-                       char possible[NUMBER_OF_POSSIBLE]);
+Grid create_grid();
+void delete_grid(Grid grid);
+char get_grid_value_xy(Grid grid, unsigned char x, unsigned char y);
+char *get_grid_possibles_xy(Grid grid, unsigned char x, unsigned char y);
+char set_grid_value_xy(Grid grid, unsigned char x, unsigned char y, char value,
+                       unsigned char supposed);
+char set_grid_possibles_xy(Grid grid, unsigned char x, unsigned char y,
+                           char possible[NUMBER_OF_POSSIBLE]);
 
 int grid_filled_count(Grid grid);
 #endif /* GRID_H */

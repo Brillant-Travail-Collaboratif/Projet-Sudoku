@@ -10,9 +10,9 @@
 #define BOX_SIDE 3
 
 /*
- * allocateSubset : alloue le tableau de 9 pointeurs SudokuTile*.
+ * allocate_subset : alloue le tableau de 9 pointeurs SudokuTile*.
  * Retourne NULL en cas d'echec malloc.
  */
-Subset allocateSubset(void);
+Subset allocate_subset(void);
 
 #endif /* SUBSET_INTERNAL_H */

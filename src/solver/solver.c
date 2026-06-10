@@ -2,7 +2,7 @@
 #include "solver_internal.h"
 #include <stddef.h>
 
-unsigned char countCandidates(const SudokuTile *tile, char *candidate) {
+unsigned char count_candidates(const SudokuTile *tile, char *candidate) {
   unsigned char count = 0;
   for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++) {
     if (tile->possible[d]) {
@@ -13,28 +13,21 @@ unsigned char countCandidates(const SudokuTile *tile, char *candidate) {
   return count;
 }
 
-void fixTileValue(SudokuTile *tile, char value) {
-  if (tileSetValue(tile, value, 0) != 0)
-    return;
-  for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++)
-    tile->possible[d] = 0;
-  tile->possible[value - 1] = 1;
-}
-
-char solveNakedSingles(Grid grid) {
-  if (grid == NULL)
+char solve_naked_singles(Grid grid) {
+  if (grid == NULL || grid->allTiles == NULL)
     return 0;
 
   char modified = 0;
   for (unsigned char i = 0; i < NUMBER_OF_TILE_IN_A_GRID; i++) {
     /* On ne touche pas aux cases deja fixees. */
-    if (grid[i].value != 0)
+    if (grid->allTiles[i].value != 0)
       continue;
 
     char candidate = 0;
-    const unsigned char count = countCandidates(&grid[i], &candidate);
+    const unsigned char count =
+        count_candidates(&grid->allTiles[i], &candidate);
     if (count == 1) {
-      fixTileValue(&grid[i], candidate);
+      set_tile_value(&grid->allTiles[i], candidate, 0);
       modified = 1;
     }
   }
@@ -62,7 +55,7 @@ char solveHiddenSinglesInSubset(Subset subset) {
       }
     }
     if (!alreadyPlaced && count == 1) {
-      fixTileValue(subset[target], j);
+      set_tile_value(subset[target], j, 0);
       modified = 1;
     }
   }
@@ -73,28 +66,17 @@ char solve_hidden_singles(Grid grid) {
   if (grid == NULL)
     return 0;
 
-  AllSubsets *all = malloc(sizeof(AllSubsets));
-  if (all == NULL)
-    return 0;
-
-  if (buildAllSubsets(grid, all) != 0) {
-    free(all);
-    return 0;
-  }
-
   unsigned char modified = 0;
 
   for (unsigned char i = 0; i < SUBSET_COUNT; i++) {
-    if (solveHiddenSinglesInSubset(all->subsets[i]) != 0)
+    if (solveHiddenSinglesInSubset(grid->allSubsets.subsets[i]) != 0)
       modified = 1;
   }
 
-  freeAllSubsets(all);
-  free(all);
   return modified;
 }
 
-char removeCandidate(SudokuTile *tile, char value) {
+char remove_tile_possible(SudokuTile *tile, char value) {
   if (tile->possible[value - 1]) {
     tile->possible[value - 1] = 0;
     return 1;
@@ -102,7 +84,7 @@ char removeCandidate(SudokuTile *tile, char value) {
   return 0;
 }
 
-char cleanLine(SudokuTile *line) {
+char clean_line(SudokuTile *line) {
   if (line == NULL)
     return 0;
 
@@ -118,14 +100,14 @@ char cleanLine(SudokuTile *line) {
         continue;
       if (line[j].value != 0)
         continue;
-      if (removeCandidate(&line[j], value))
+      if (remove_tile_possible(&line[j], value))
         modified = 1;
     }
   }
   return modified;
 }
 
-char cleanSubset(Subset s) {
+char clean_subset(Subset s) {
   if (s == NULL)
     return 0;
 
@@ -140,18 +122,24 @@ char cleanSubset(Subset s) {
         continue;
       if (s[j]->value != 0)
         continue;
-      if (removeCandidate(s[j], value))
+      if (remove_tile_possible(s[j], value))
         modified = 1;
     }
   }
   return modified;
 }
 char solve_hidden_singles_in_line(SudokuTile *line) {
+  if (line == NULL)
+    return 0;
+
   unsigned char modified = 0;
-  for (unsigned char i = 1; i <= NUMBER_OF_POSSIBLE; i++) {
+  for (unsigned char i = 0; i < NUMBER_OF_POSSIBLE; i++) {
     unsigned char localisationOfCandidate = 0;
     for (unsigned char j = 0; j < NUMBER_OF_POSSIBLE; j++) {
-      char candidateValue = tileGetPossible(&line[j])[i];
+      char *possible = get_tile_possibles(&line[j]);
+      if (possible == NULL)
+        continue;
+      char candidateValue = possible[i];
       if (candidateValue != 0 && localisationOfCandidate != 0)
         localisationOfCandidate = j;
       else if (candidateValue != 0) {
@@ -160,7 +148,7 @@ char solve_hidden_singles_in_line(SudokuTile *line) {
       }
     }
     if (localisationOfCandidate != 0) {
-      tileSetValue(&line[localisationOfCandidate], i, 0);
+      set_tile_value(&line[localisationOfCandidate], i + 1, 0);
       modified = 1;
     }
   }
@@ -171,24 +159,13 @@ char clean_grid(Grid grid) {
   if (grid == NULL)
     return 0;
 
-  AllSubsets *all = malloc(sizeof(AllSubsets));
-  if (all == NULL)
-    return 0;
-
-  if (buildAllSubsets(grid, all) != 0) {
-    free(all);
-    return 0;
-  }
-
   unsigned char modified = 0;
 
   for (unsigned char i = 0; i < SUBSET_COUNT; i++) {
-    if (cleanSubset(all->subsets[i]) != 0)
+    if (clean_subset(grid->allSubsets.subsets[i]) != 0)
       modified = 1;
   }
 
-  freeAllSubsets(all);
-  free(all);
   return modified;
 }
 
@@ -197,20 +174,13 @@ char clean_grid(Grid grid) {
 char apply_rule_on_grid(Grid grid, char (*rule)(Subset)) {
   if (grid == NULL || rule == NULL)
     return 0;
-  AllSubsets *all = malloc(sizeof(AllSubsets));
-  if (all == NULL)
-    return 0;
-  if (buildAllSubsets(grid, all) != 0) {
-    free(all);
-    return 0;
-  }
+
   char modified = 0;
   for (unsigned char i = 0; i < SUBSET_COUNT; i++) {
-    if (rule(all->subsets[i]))
+    if (rule(grid->allSubsets.subsets[i]))
       modified = 1;
   }
-  freeAllSubsets(all);
-  free(all);
+
   return modified;
 }
 
@@ -252,9 +222,9 @@ char clean_naked_pair_in_subset(Subset s) {
       for (unsigned char k = 0; k < TILES_PER_LINE; k++) {
         if (k == i || k == j || s[k]->value != 0)
           continue;
-        if (removeCandidate(s[k], ci[0]))
+        if (remove_tile_possible(s[k], ci[0]))
           modified = 1;
-        if (removeCandidate(s[k], ci[1]))
+        if (remove_tile_possible(s[k], ci[1]))
           modified = 1;
       }
     }
@@ -400,7 +370,7 @@ char clean_naked_triple_in_subset(Subset s) {
           if (l == i || l == j || l == k || s[l]->value != 0)
             continue;
           for (int a = 0; a < union_size; a++)
-            if (removeCandidate(s[l], union_vals[a]))
+            if (remove_tile_possible(s[l], union_vals[a]))
               modified = 1;
         }
       }
@@ -550,70 +520,58 @@ char clean_hidden_triples(Grid grid) {
 }
 
 char is_grid_valid(Grid grid) {
-  if (grid == NULL)
+  if (grid == NULL || grid->allTiles == NULL)
     return 0;
   /* (a) Aucune case inconnue ne doit etre privee de candidats. */
   for (int i = 0; i < NUMBER_OF_TILE_IN_A_GRID; i++) {
-    if (grid[i].value != 0)
+    if (grid->allTiles[i].value != 0)
       continue;
     char any = 0;
     for (int d = 0; d < NUMBER_OF_POSSIBLE; d++)
-      if (grid[i].possible[d]) {
+      if (grid->allTiles[i].possible[d]) {
         any = 1;
         break;
       }
     if (!any)
       return 0;
   }
-  /* (b) Aucun sous-ensemble ne doit contenir deux fois la meme valeur fixee.
-     Ce cas n'arrive jamais en deduction propre, mais peut survenir apres
-     une supposition fausse propagee : on doit le detecter pour declencher
-     back_play() au lieu de retourner une grille complete et incorrecte. */
-  AllSubsets *all = malloc(sizeof(AllSubsets));
-  if (all == NULL)
-    return 1; /* en cas de OOM, ne pas mentir : autorise */
-  if (buildAllSubsets(grid, all) != 0) {
-    free(all);
-    return 1;
-  }
+
   for (int s = 0; s < SUBSET_COUNT; s++) {
     char seen[NUMBER_OF_POSSIBLE] = {0};
     for (int k = 0; k < TILES_PER_LINE; k++) {
-      char v = all->subsets[s][k]->value;
+      char v = grid->allSubsets.subsets[s][k]->value;
       if (v == 0)
         continue;
       if (seen[v - 1]) {
-        freeAllSubsets(all);
-        free(all);
         return 0;
       }
       seen[v - 1] = 1;
     }
   }
-  freeAllSubsets(all);
-  free(all);
+
   return 1;
 }
 
 char guess_value(Grid grid) {
-  for (int i = 0; i < GRID_SIZE; i++) {
-    if (grid[i].value != 0)
-      continue;
+  for (int expected_count = 2; expected_count <= GRID_SIDE; expected_count++) {
+    for (int i = 0; i < GRID_SIZE; i++) {
+      if (grid->allTiles[i].value != 0)
+        continue;
 
-    int count = 0;
-    int first_val = -1;
-    for (int d = 0; d < GRID_SIDE; d++) {
-      if (grid[i].possible[d]) {
-        count++;
-        if (first_val == -1)
-          first_val = d + 1;
+      int count = 0;
+      int first_val = -1;
+      for (int d = 0; d < GRID_SIDE; d++) {
+        if (grid->allTiles[i].possible[d]) {
+          count++;
+          if (first_val == -1)
+            first_val = d + 1;
+        }
       }
-    }
 
-    if (count == 2) {
-
-      tileSetValue(&grid[i], (char)first_val, 1);
-      return 1;
+      if (count == expected_count) {
+        set_tile_value(&grid->allTiles[i], (char)first_val, 1);
+        return 1;
+      }
     }
   }
   return 0;
@@ -638,10 +596,10 @@ void back_play(Grid grid) {
   }
 
   for (unsigned char tile = 0; tile < NUMBER_OF_TILE_IN_A_GRID; tile++) {
-    if (grid[tile].value == 0) {
+    if (grid->allTiles[tile].value == 0) {
       for (unsigned char possible = 0; possible < NUMBER_OF_POSSIBLE;
            possible++) {
-        grid[tile].possible[possible] = 1;
+        grid->allTiles[tile].possible[possible] = 1;
       }
     }
   }
@@ -660,7 +618,7 @@ void deduce_until_stable(Grid grid) {
   do {
     modified = 0;
     modified |= clean_grid(grid);
-    modified |= solveNakedSingles(grid);
+    modified |= solve_naked_singles(grid);
     modified |= solve_hidden_singles(grid);
     modified |= clean_naked_pairs(grid);
     modified |= clean_naked_pairs(grid);
@@ -680,7 +638,7 @@ char has_pending_supposition() {
 static int filled_count(Grid grid) {
   int c = 0;
   for (int i = 0; i < NUMBER_OF_TILE_IN_A_GRID; i++)
-    if (grid[i].value != 0)
+    if (grid->allTiles[i].value != 0)
       c++;
   return c;
 }

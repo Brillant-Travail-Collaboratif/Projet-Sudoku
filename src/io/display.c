@@ -1,6 +1,6 @@
 #include "display_internal.h"
 
-void displayFinal(Grid grid) {
+void display_values(Grid grid) {
   clear();
   if (grid == NULL)
     return;
@@ -11,7 +11,7 @@ void displayFinal(Grid grid) {
     for (unsigned char x = 1; x <= GRID_SIDE; x++) {
       if ((x - 1) % BOX_SIDE == 0)
         printw("| ");
-      const char value = gridGetValueXY(grid, x, y);
+      const char value = get_grid_value_xy(grid, x, y);
       printw("%c ", value == 0 ? ' ' : (char)('0' + value));
     }
     printw("|\n");
@@ -20,7 +20,7 @@ void displayFinal(Grid grid) {
   refresh();
 }
 
-void displayPossible(Grid grid) {
+void display_possibles(Grid grid) {
   clear();
   if (grid == NULL)
     return;
@@ -32,8 +32,8 @@ void displayPossible(Grid grid) {
       for (unsigned char x = 1; x <= GRID_SIDE; x++) {
         if ((x - 1) % BOX_SIDE == 0)
           printw("| ");
-        const char value = gridGetValueXY(grid, x, y);
-        const char *possible = gridGetPossibleXY(grid, x, y);
+        const char value = get_grid_value_xy(grid, x, y);
+        const char *possible = get_grid_possibles_xy(grid, x, y);
         for (unsigned char k = 0; k < BOX_SIDE; k++) {
           const char digit = (char)(band * BOX_SIDE + k + 1);
           if (value != 0) {
@@ -52,8 +52,8 @@ void displayPossible(Grid grid) {
   refresh();
 }
 
-void req_start_grid(Grid grid) {
-  displayFinal(grid);
+void start_grid_tui(Grid grid) {
+  display_values(grid);
   printw("Press q to quit\n");
   move(1, 2);
 
@@ -74,12 +74,12 @@ void req_start_grid(Grid grid) {
       if (x + 1 <= NUMBER_OF_POSSIBLE)
         x++;
     } else if (ch == '?') {
-      gridSetValueXY(grid, x, y, 0, 0);
+      set_grid_value_xy(grid, x, y, 0, 0);
       refresh();
     } else {
       ch -= 48;
       if (ch > 0 && ch <= 10)
-        gridSetValueXY(grid, x, y, ch, 0);
+        set_grid_value_xy(grid, x, y, ch, 0);
     }
 
     unsigned char mvx, mvy;
@@ -96,13 +96,13 @@ void req_start_grid(Grid grid) {
     if (y >= 7)
       mvy++;
 
-    displayFinal(grid);
+    display_values(grid);
     printw("Press q to quit\n");
     refresh();
     move(mvy, mvx);
   }
 }
-void dispSubset(Subset s) {
+void display_subset(Subset s) {
   if (s == NULL) {
     printf("(subset NULL)\n");
     return;

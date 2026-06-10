@@ -5,7 +5,7 @@
 #include "tile.h"
 #include <stdlib.h>
 
-char isValueValid(char value);
-char isPossibleValid(const char possible[NUMBER_OF_POSSIBLE]);
+char is_value_valid(char value);
+char is_possibles_valid(const char possible[NUMBER_OF_POSSIBLE]);
 
 #endif /* TILE_INTERNAL_H */
