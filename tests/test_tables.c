@@ -10,9 +10,7 @@
 #define TABLES_DIR "tables"
 #endif
 
-
 #define PER_GRID_BUDGET_SEC 30.0
-
 
 static const struct {
   const char *file;
@@ -23,7 +21,6 @@ static const struct {
     {"intermediate_table_2.txt", 1}, {"difficile_table_1.txt", 1},
     {"expert_table_1.txt", 1},       {"expert_table_2.txt", 0},
 };
-
 
 static int has_no_duplicate(Grid g) {
   for (int s = 0; s < SUBSET_COUNT; s++) {
@@ -43,7 +40,7 @@ static int has_no_duplicate(Grid g) {
 static void test_solve_all_tables(void) {
   char path[512];
   for (size_t i = 0; i < sizeof(k_tables) / sizeof(k_tables[0]); i++) {
-    snprintf(path, sizeof(path), "%s/%s", TABLES_DIR, k_tables[i].file);
+    snprintf(path, sizeof(path), "../%s/%s", TABLES_DIR, k_tables[i].file);
     Grid g = load_sudoku_from_file(path);
     CU_ASSERT_PTR_NOT_NULL_FATAL(g);
 
@@ -66,7 +63,8 @@ int register_tables_tests(void) {
   CU_pSuite suite = CU_add_suite("tables (integration)", NULL, NULL);
   if (suite == NULL)
     return 1;
-  if (CU_add_test(suite, "solve every table in budget", test_solve_all_tables) == NULL)
+  if (CU_add_test(suite, "solve every table in budget",
+                  test_solve_all_tables) == NULL)
     return 1;
   return 0;
 }

@@ -2,6 +2,7 @@
 #include "generator/generator.h"
 #include "grid/grid.h"
 #include "io/display.h"
+#include "io/read.h"
 #include "solver/solver.h"
 #include "sudoku_types/type_grid.h"
 #include <ncurses.h>
@@ -72,6 +73,16 @@ int main(int argc, char **argv) {
 
   delete_grid(grid);
   refresh();
+
+  Grid gridFromFile = load_sudoku_from_file("../tables/expert_table_2.txt");
+
+  if (gridFromFile != NULL) {
+    display_values(gridFromFile);
+    solve(gridFromFile);
+    display_values(gridFromFile);
+    delete_grid(gridFromFile);
+  }
+
   if (interactive)
     getch();
   endwin();

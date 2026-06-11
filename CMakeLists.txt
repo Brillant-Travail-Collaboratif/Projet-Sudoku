@@ -68,7 +68,7 @@ if(BUILD_TESTING)
         find_library(CUNIT_LIBRARY cunit)
 
         if(CUNIT_INCLUDE_DIR AND CUNIT_LIBRARY)
-                add_executable(sudoku_tests tests/test_runner.c tests/test_grid.c tests/test_suites.h)
+                add_executable(sudoku_tests tests/test_runner.c tests/test_grid.c tests/test_generator.c tests/test_io.c tests/test_solver.c tests/test_tables.c tests/test_tile.c tests/test_suites.h)
                 target_include_directories(sudoku_tests PRIVATE ${CUNIT_INCLUDE_DIR})
                 target_link_libraries(sudoku_tests PRIVATE sudoku_core ${CUNIT_LIBRARY})
 

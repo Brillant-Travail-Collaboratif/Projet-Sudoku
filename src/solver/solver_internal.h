@@ -2,6 +2,7 @@
 #define SOLVER_INTERNAL_H
 
 #define TILES_PER_LINE 9
+#define MAX_SOLVE_ROUNDS 5000L
 
 #include "../subset/subset.h"
 #include "../sudoku_types/type_history.h"

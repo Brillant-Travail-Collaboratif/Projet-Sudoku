@@ -2,6 +2,7 @@
 
 Affectation history[81];
 int history_index;
+int deduction_count;
 
 SudokuTile *create_tile(const char value,
                         const char possible[NUMBER_OF_POSSIBLE]) {
@@ -34,7 +35,7 @@ char is_value_valid(char value) {
 
 char is_possibles_valid(const char possible[NUMBER_OF_POSSIBLE]) {
   for (unsigned char i = 0; i < NUMBER_OF_POSSIBLE; i++) {
-    if (possible[i] >= 0 && possible[i] <= 1)
+    if (possible[i] < 0 || possible[i] > 1)
       return 1;
   }
   return 0;
@@ -72,6 +73,8 @@ char set_tile_value(SudokuTile *tile, char value, unsigned char supposed) {
     history[history_index].tile = tile;
     history[history_index].value = value;
     history[history_index++].supposed = supposed;
+    if (!supposed)
+      deduction_count++;
   }
   return 0;
 }
