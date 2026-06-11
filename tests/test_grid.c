@@ -5,7 +5,7 @@ static void test_create_grid_starts_empty(void) {
   Grid grid = create_grid();
   CU_ASSERT_PTR_NOT_NULL_FATAL(grid);
   CU_ASSERT_EQUAL(grid_filled_count(grid), 0);
-  /* Every cell starts unknown with all nine candidates. */
+
   for (unsigned char y = 1; y <= 9; y++)
     for (unsigned char x = 1; x <= 9; x++) {
       CU_ASSERT_EQUAL(get_grid_value_xy(grid, x, y), 0);
@@ -22,7 +22,7 @@ static void test_set_get_value(void) {
   CU_ASSERT_EQUAL(set_grid_value_xy(grid, 3, 4, 7, 0), 0);
   CU_ASSERT_EQUAL(get_grid_value_xy(grid, 3, 4), 7);
   CU_ASSERT_EQUAL(grid_filled_count(grid), 1);
-  /* Fixing a value collapses the candidates to that single digit. */
+
   char *p = get_grid_possibles_xy(grid, 3, 4);
   CU_ASSERT_PTR_NOT_NULL_FATAL(p);
   CU_ASSERT_EQUAL(p[6], 1);
@@ -32,7 +32,7 @@ static void test_set_get_value(void) {
 
 static void test_value_bounds_are_rejected(void) {
   Grid grid = create_grid();
-  /* x / y out of 1..9 must be refused, not crash. */
+
   CU_ASSERT_EQUAL(set_grid_value_xy(grid, 0, 1, 5, 0), 1);
   CU_ASSERT_EQUAL(set_grid_value_xy(grid, 10, 1, 5, 0), 1);
   CU_ASSERT_EQUAL(set_grid_value_xy(grid, 1, 0, 5, 0), 1);
@@ -44,7 +44,6 @@ static void test_value_bounds_are_rejected(void) {
 
 static void test_set_raw_does_not_journal(void) {
   Grid grid = create_grid();
-  /* set_grid_value_raw places a clue without touching the history. */
   CU_ASSERT_EQUAL(set_grid_value_raw(grid, 1, 1, 4), 0);
   CU_ASSERT_EQUAL(get_grid_value_xy(grid, 1, 1), 4);
   char *p = get_grid_possibles_xy(grid, 1, 1);
@@ -59,7 +58,7 @@ static void test_clone_is_independent(void) {
   Grid clone = clone_grid_values(grid);
   CU_ASSERT_PTR_NOT_NULL_FATAL(clone);
   CU_ASSERT_EQUAL(get_grid_value_xy(clone, 1, 1), 9);
-  /* Mutating the clone must not affect the original. */
+
   set_grid_value_xy(clone, 2, 2, 3, 0);
   CU_ASSERT_EQUAL(get_grid_value_xy(grid, 2, 2), 0);
   delete_grid(clone);
@@ -71,7 +70,7 @@ static void test_null_safety(void) {
   CU_ASSERT_EQUAL(get_grid_value_xy(NULL, 1, 1), 0);
   CU_ASSERT_PTR_NULL(get_grid_possibles_xy(NULL, 1, 1));
   CU_ASSERT_PTR_NULL(clone_grid_values(NULL));
-  delete_grid(NULL); /* must not crash */
+  delete_grid(NULL);
 }
 
 int register_grid_tests(void) {
