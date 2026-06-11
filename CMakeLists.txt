@@ -10,6 +10,7 @@ find_package(Curses REQUIRED)
 
 include_directories(src/cli)
 include_directories(src/grid)
+include_directories(src/generator)
 include_directories(src/io)
 include_directories(src/solver)
 include_directories(src/sudoku_types)
@@ -24,6 +25,15 @@ add_executable(Projet_Sudoku
         src/grid/tile.c
         src/grid/tile.h
         src/grid/tile_internal.h
+        src/generator/generator.c
+        src/generator/generator.h
+        src/generator/generator_internal.h
+        src/generator/difficulty.c
+        src/generator/difficulty.h
+        src/generator/difficulty.h
+        src/generator/random.c
+        src/generator/random.h
+        src/generator/random_internal.h
         src/io/io.c
         src/io/io.h
         src/io/io_internal.h
@@ -38,7 +48,10 @@ add_executable(Projet_Sudoku
         src/io/display_internal.h
         src/subset/subset.c
         src/subset/subset.h
-        src/main.c)
+        src/main.c
+        src/generator/generator.c
+        src/generator/generator.h
+        src/generator/generator_internal.h)
 
 target_include_directories(Projet_Sudoku PRIVATE ${CURSES_INCLUDE_DIR})
 target_link_libraries(Projet_Sudoku PRIVATE ${CURSES_LIBRARIES})
