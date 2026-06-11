@@ -14,6 +14,7 @@ static void test_create_and_get(void) {
   CU_ASSERT_PTR_NOT_NULL_FATAL(t);
   CU_ASSERT_EQUAL(get_tile_value(t), 0);
   delete_tile(t);
+
 }
 
 static void test_set_value_collapses_and_journals(void) {
