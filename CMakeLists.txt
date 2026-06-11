@@ -8,14 +8,16 @@ set(LDFLAGS "")
 
 find_package(Curses REQUIRED)
 
-include_directories(src/cli)
-include_directories(src/grid)
-include_directories(src/generator)
-include_directories(src/io)
-include_directories(src/solver)
-include_directories(src/sudoku_types)
+set(SUDOKU_INCLUDE_DIRS
+        src/cli
+        src/grid
+        src/generator
+        src/io
+        src/solver
+        src/subset
+        src/sudoku_types)
 
-add_executable(Projet_Sudoku
+set(SUDOKU_SOURCES
         src/cli/cli.c
         src/cli/cli.h
         src/cli/cli_internal.h
@@ -30,7 +32,6 @@ add_executable(Projet_Sudoku
         src/generator/generator_internal.h
         src/generator/difficulty.c
         src/generator/difficulty.h
-        src/generator/difficulty.h
         src/generator/random.c
         src/generator/random.h
         src/generator/random_internal.h
@@ -44,19 +45,35 @@ add_executable(Projet_Sudoku
         src/solver/solver_internal.h
         src/io/display.c
         src/io/display.h
-        src/io/display.h
         src/io/display_internal.h
         src/subset/subset.c
         src/subset/subset.h
-        src/main.c
-        src/generator/generator.c
-        src/generator/generator.h
-        src/generator/generator_internal.h)
+        src/subset/subset_internal.h)
 
-target_include_directories(Projet_Sudoku PRIVATE ${CURSES_INCLUDE_DIR})
-target_link_libraries(Projet_Sudoku PRIVATE ${CURSES_LIBRARIES})
+add_library(sudoku_core ${SUDOKU_SOURCES})
+target_include_directories(sudoku_core PUBLIC ${SUDOKU_INCLUDE_DIRS})
+target_include_directories(sudoku_core PRIVATE ${CURSES_INCLUDE_DIR})
+target_link_libraries(sudoku_core PUBLIC ${CURSES_LIBRARIES})
 
-add_test(NAME valgrind_test
-        COMMAND valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./Projet_Sudoku)
+add_executable(Projet_Sudoku src/main.c)
+target_link_libraries(Projet_Sudoku PRIVATE sudoku_core)
 
-enable_testing()
+include(CTest)
+
+if(BUILD_TESTING)
+        add_test(NAME valgrind_test
+                COMMAND valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 $<TARGET_FILE:Projet_Sudoku>)
+
+        find_path(CUNIT_INCLUDE_DIR CUnit/CUnit.h)
+        find_library(CUNIT_LIBRARY cunit)
+
+        if(CUNIT_INCLUDE_DIR AND CUNIT_LIBRARY)
+                add_executable(sudoku_tests tests/test_runner.c tests/test_grid.c tests/test_suites.h)
+                target_include_directories(sudoku_tests PRIVATE ${CUNIT_INCLUDE_DIR})
+                target_link_libraries(sudoku_tests PRIVATE sudoku_core ${CUNIT_LIBRARY})
+
+                add_test(NAME cunit_tests COMMAND sudoku_tests)
+        else()
+                message(WARNING "CUnit was not found. Install the CUnit development package to build sudoku_tests.")
+        endif()
+endif()

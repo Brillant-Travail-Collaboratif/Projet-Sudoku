@@ -13,6 +13,7 @@ int main(int argc, char **argv) {
   Difficulty difficulty = BASIC;
   unsigned int seed = 1;
   char verbose = 0;
+  char interactive = 0;
 
   for (int i = 1; i < argc; i++) {
     Difficulty parsed_difficulty;
@@ -21,7 +22,9 @@ int main(int argc, char **argv) {
 
     if (strcmp(argv[i], "-v") == 0) {
       verbose = 1;
-    } else if (parse_difficulty(argv[i], &parsed_difficulty)) {
+    } else if (strcmp(argv[i], "-i") == 0)
+      interactive = 1;
+    else if (parse_difficulty(argv[i], &parsed_difficulty)) {
       difficulty = parsed_difficulty;
     } else {
       parsed_seed = strtoul(argv[i], &end, 10);
@@ -55,7 +58,8 @@ int main(int argc, char **argv) {
          seed);
   printw("Press any key to solve\n");
   refresh();
-  getch();
+  if (interactive)
+    getch();
 
   int suppositions = 0;
   solve_with_stats(grid, &suppositions);
@@ -68,7 +72,8 @@ int main(int argc, char **argv) {
 
   delete_grid(grid);
   refresh();
-  getch();
+  if (interactive)
+    getch();
   endwin();
   delscreen(screen);
   if (argc && argv)
