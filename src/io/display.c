@@ -54,6 +54,7 @@ void display_possibles(Grid grid) {
 
 void start_grid_tui(Grid grid) {
   display_values(grid);
+  printw("Press s to solve\n");
   printw("Press q to quit\n");
   move(1, 2);
 
@@ -76,9 +77,11 @@ void start_grid_tui(Grid grid) {
     } else if (ch == '?') {
       set_grid_value_xy(grid, x, y, 0, 0);
       refresh();
+    } else if (ch == 's') {
+      solve(grid);
     } else {
       ch -= 48;
-      if (ch > 0 && ch <= 10)
+      if (ch > 0 && ch <= 9)
         set_grid_value_xy(grid, x, y, ch, 0);
     }
 
@@ -97,11 +100,13 @@ void start_grid_tui(Grid grid) {
       mvy++;
 
     display_values(grid);
+    printw("Press s to solve\n");
     printw("Press q to quit\n");
     refresh();
     move(mvy, mvx);
   }
 }
+
 void display_subset(Subset s) {
   if (s == NULL) {
     printf("(subset NULL)\n");

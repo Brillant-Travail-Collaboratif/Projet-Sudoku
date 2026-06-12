@@ -62,13 +62,23 @@ include(CTest)
 
 if(BUILD_TESTING)
         add_test(NAME valgrind_test
-                COMMAND valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 $<TARGET_FILE:Projet_Sudoku>)
+                COMMAND valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1
+                        $<TARGET_FILE:Projet_Sudoku> -benchmark ${CMAKE_SOURCE_DIR}/tables)
 
         find_path(CUNIT_INCLUDE_DIR CUnit/CUnit.h)
         find_library(CUNIT_LIBRARY cunit)
 
         if(CUNIT_INCLUDE_DIR AND CUNIT_LIBRARY)
-                add_executable(sudoku_tests tests/test_runner.c tests/test_grid.c tests/test_generator.c tests/test_io.c tests/test_solver.c tests/test_tables.c tests/test_tile.c tests/test_subset.c tests/test_suites.h)
+                add_executable(sudoku_tests
+                        tests/test_runner.c
+                        tests/test_suites.h
+                        tests/test_grid.c
+                        tests/test_tile.c
+                        tests/test_subset.c
+                        tests/test_solver.c
+                        tests/test_io.c
+                        tests/test_generator.c
+                        tests/test_tables.c)
                 target_include_directories(sudoku_tests PRIVATE ${CUNIT_INCLUDE_DIR})
                 target_link_libraries(sudoku_tests PRIVATE sudoku_core ${CUNIT_LIBRARY})
 

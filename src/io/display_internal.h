@@ -1,6 +1,7 @@
 #ifndef DISPLAY_INTERNAL_H
 #define DISPLAY_INTERNAL_H
 
+#include "../solver/solver.h"
 #include "display.h"
 #include <ncurses.h>
 #include <stdio.h>
