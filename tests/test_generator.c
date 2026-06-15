@@ -22,6 +22,7 @@ static void test_random_limit_one(void) {
   GeneratorRandom r = {7u};
   CU_ASSERT_EQUAL(generator_random_int(&r, 1), 0);
   CU_ASSERT_EQUAL(generator_random_int(&r, 0), 0);
+  CU_ASSERT_EQUAL(generator_random_int(&r, -3), 0);
 }
 
 static void test_shuffle_is_a_permutation(void) {
@@ -37,21 +38,38 @@ static void test_shuffle_is_a_permutation(void) {
   }
   for (int i = 0; i < 9; i++)
     CU_ASSERT_EQUAL(seen[i], 1);
+
+  shuffle_ints(&r, v, 0);
+  shuffle_ints(&r, v, 1);
+  CU_ASSERT_TRUE(v[0] >= 0 && v[0] < 9);
 }
 
 static void test_parse_difficulty(void) {
   Difficulty d;
   CU_ASSERT_EQUAL(parse_difficulty("trivial", &d), 1);
   CU_ASSERT_EQUAL(d, TRIVIAL);
+  CU_ASSERT_EQUAL(parse_difficulty("basic", &d), 1);
+  CU_ASSERT_EQUAL(d, BASIC);
+  CU_ASSERT_EQUAL(parse_difficulty("intermediate", &d), 1);
+  CU_ASSERT_EQUAL(d, INTERMEDIATE);
+  CU_ASSERT_EQUAL(parse_difficulty("difficile", &d), 1);
+  CU_ASSERT_EQUAL(d, DIFFICILE);
+  CU_ASSERT_EQUAL(parse_difficulty("difficult", &d), 1);
+  CU_ASSERT_EQUAL(d, DIFFICILE);
   CU_ASSERT_EQUAL(parse_difficulty("expert", &d), 1);
   CU_ASSERT_EQUAL(d, EXPERT);
   CU_ASSERT_EQUAL(parse_difficulty("nope", &d), 0);
   CU_ASSERT_EQUAL(parse_difficulty(NULL, &d), 0);
+  CU_ASSERT_EQUAL(parse_difficulty("basic", NULL), 0);
 }
 
 static void test_difficulty_to_string(void) {
   CU_ASSERT_STRING_EQUAL(difficulty_to_string(TRIVIAL), "trivial");
+  CU_ASSERT_STRING_EQUAL(difficulty_to_string(BASIC), "basic");
+  CU_ASSERT_STRING_EQUAL(difficulty_to_string(INTERMEDIATE), "intermediate");
+  CU_ASSERT_STRING_EQUAL(difficulty_to_string(DIFFICILE), "difficile");
   CU_ASSERT_STRING_EQUAL(difficulty_to_string(EXPERT), "expert");
+  CU_ASSERT_STRING_EQUAL(difficulty_to_string((Difficulty)99), "basic");
 }
 
 static void test_generate_is_valid_and_reproducible(void) {

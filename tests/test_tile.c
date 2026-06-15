@@ -13,8 +13,11 @@ static void test_create_and_get(void) {
   SudokuTile *t = create_tile(0, p);
   CU_ASSERT_PTR_NOT_NULL_FATAL(t);
   CU_ASSERT_EQUAL(get_tile_value(t), 0);
+  char *q = get_tile_possibles(t);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(q);
+  for (int i = 0; i < NUMBER_OF_POSSIBLE; i++)
+    CU_ASSERT_EQUAL(q[i], 1);
   delete_tile(t);
-
 }
 
 static void test_set_value_collapses_and_journals(void) {
@@ -68,6 +71,8 @@ static void test_invalid_value_rejected(void) {
   CU_ASSERT_EQUAL(set_tile_value(t, 10, 0), 1); /* out of 0..9 */
   CU_ASSERT_EQUAL(set_tile_value(NULL, 5, 0), 1);
   CU_ASSERT_EQUAL(get_tile_value(NULL), 0);
+  t->value = 10;
+  CU_ASSERT_EQUAL(get_tile_value(t), 0);
   delete_tile(t);
   delete_tile(NULL);
 }
@@ -77,10 +82,13 @@ int register_tile_tests(void) {
   if (suite == NULL)
     return 1;
   if (CU_add_test(suite, "create/get", test_create_and_get) == NULL ||
-      CU_add_test(suite, "set collapses + journals", test_set_value_collapses_and_journals) == NULL ||
-      CU_add_test(suite, "set 0 no journal", test_set_zero_does_not_journal) == NULL ||
+      CU_add_test(suite, "set collapses + journals",
+                  test_set_value_collapses_and_journals) == NULL ||
+      CU_add_test(suite, "set 0 no journal", test_set_zero_does_not_journal) ==
+          NULL ||
       CU_add_test(suite, "deduction counter", test_deduction_counter) == NULL ||
-      CU_add_test(suite, "invalid rejected", test_invalid_value_rejected) == NULL)
+      CU_add_test(suite, "invalid rejected", test_invalid_value_rejected) ==
+          NULL)
     return 1;
   return 0;
 }

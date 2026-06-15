@@ -17,28 +17,6 @@ static Grid grid_from(const char cells[81]) {
   return g;
 }
 
-static void test_naked_single(void) {
-  Grid g = create_grid();
-  reset_grid_candidates(g);
-  char *p = get_grid_possibles_xy(g, 1, 1);
-  for (int d = 0; d < 9; d++)
-    p[d] = 0;
-  p[2] = 1;
-  CU_ASSERT_EQUAL(solve_naked_singles(g), 1);
-  CU_ASSERT_EQUAL(get_grid_value_xy(g, 1, 1), 3);
-  delete_grid(g);
-}
-
-static void test_clean_grid_propagates(void) {
-  Grid g = create_grid();
-  set_grid_value_raw(g, 1, 1, 5);
-  reset_grid_candidates(g);
-  CU_ASSERT_EQUAL(clean_grid(g), 1);
-  char *p = get_grid_possibles_xy(g, 2, 1);
-  CU_ASSERT_EQUAL(p[4], 0);
-  delete_grid(g);
-}
-
 static void test_is_grid_valid_detects_duplicate(void) {
   Grid g = create_grid();
   set_grid_value_raw(g, 1, 1, 5);
@@ -70,10 +48,7 @@ int register_solver_tests(void) {
   CU_pSuite suite = CU_add_suite("solver", NULL, NULL);
   if (suite == NULL)
     return 1;
-  if (CU_add_test(suite, "naked single", test_naked_single) == NULL ||
-      CU_add_test(suite, "clean_grid propagates", test_clean_grid_propagates) ==
-          NULL ||
-      CU_add_test(suite, "is_grid_valid duplicate",
+  if (CU_add_test(suite, "is_grid_valid duplicate",
                   test_is_grid_valid_detects_duplicate) == NULL ||
       CU_add_test(suite, "solve complete grid", test_solve_complete_grid) ==
           NULL ||

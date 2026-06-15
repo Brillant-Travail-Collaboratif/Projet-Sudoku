@@ -35,7 +35,6 @@ static void test_subsq_subset_numbering(void) {
   CU_ASSERT_PTR_EQUAL(s[8], cell(g, 5, 5));
   delete_subset(s);
 
-
   s = get_subsq_subset(g, 2);
   CU_ASSERT_PTR_EQUAL(s[0], cell(g, 0, 6));
   CU_ASSERT_PTR_EQUAL(s[8], cell(g, 2, 8));
@@ -56,7 +55,13 @@ static void test_out_of_range_returns_null(void) {
   Grid g = create_grid();
   CU_ASSERT_PTR_NULL(get_line_subset(g, -1));
   CU_ASSERT_PTR_NULL(get_line_subset(g, 9));
+  CU_ASSERT_PTR_NULL(get_line_subset(NULL, 0));
+  CU_ASSERT_PTR_NULL(get_col_subset(g, -1));
+  CU_ASSERT_PTR_NULL(get_col_subset(g, 9));
   CU_ASSERT_PTR_NULL(get_col_subset(NULL, 0));
+  CU_ASSERT_PTR_NULL(get_subsq_subset(g, -1));
+  CU_ASSERT_PTR_NULL(get_subsq_subset(g, 9));
+  CU_ASSERT_PTR_NULL(get_subsq_subset(NULL, 0));
   delete_subset(NULL);
   delete_grid(g);
 }
@@ -67,9 +72,12 @@ int register_subset_tests(void) {
     return 1;
   if (CU_add_test(suite, "line subset", test_line_subset) == NULL ||
       CU_add_test(suite, "col subset", test_col_subset) == NULL ||
-      CU_add_test(suite, "box numbering", test_subsq_subset_numbering) == NULL ||
-      CU_add_test(suite, "build all subsets", test_build_all_subsets_covers_grid) == NULL ||
-      CU_add_test(suite, "out of range -> NULL", test_out_of_range_returns_null) == NULL)
+      CU_add_test(suite, "box numbering", test_subsq_subset_numbering) ==
+          NULL ||
+      CU_add_test(suite, "build all subsets",
+                  test_build_all_subsets_covers_grid) == NULL ||
+      CU_add_test(suite, "out of range -> NULL",
+                  test_out_of_range_returns_null) == NULL)
     return 1;
   return 0;
 }

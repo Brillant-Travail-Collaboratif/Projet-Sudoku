@@ -36,6 +36,8 @@ static void test_value_bounds_are_rejected(void) {
   CU_ASSERT_EQUAL(set_grid_value_xy(grid, 0, 1, 5, 0), 1);
   CU_ASSERT_EQUAL(set_grid_value_xy(grid, 10, 1, 5, 0), 1);
   CU_ASSERT_EQUAL(set_grid_value_xy(grid, 1, 0, 5, 0), 1);
+  CU_ASSERT_EQUAL(set_grid_value_xy(grid, 1, 1, 10, 0), 1);
+  CU_ASSERT_EQUAL(set_grid_value_xy(NULL, 1, 1, 5, 0), 1);
   CU_ASSERT_EQUAL(get_grid_value_xy(grid, 0, 1), 0);
   CU_ASSERT_EQUAL(get_grid_value_xy(grid, 10, 1), 0);
   CU_ASSERT_EQUAL(grid_filled_count(grid), 0);
@@ -77,11 +79,14 @@ int register_grid_tests(void) {
   CU_pSuite suite = CU_add_suite("grid", NULL, NULL);
   if (suite == NULL)
     return 1;
-  if (CU_add_test(suite, "create starts empty", test_create_grid_starts_empty) == NULL ||
+  if (CU_add_test(suite, "create starts empty",
+                  test_create_grid_starts_empty) == NULL ||
       CU_add_test(suite, "set/get value", test_set_get_value) == NULL ||
-      CU_add_test(suite, "out-of-bounds rejected", test_value_bounds_are_rejected) == NULL ||
+      CU_add_test(suite, "out-of-bounds rejected",
+                  test_value_bounds_are_rejected) == NULL ||
       CU_add_test(suite, "raw set", test_set_raw_does_not_journal) == NULL ||
-      CU_add_test(suite, "clone independent", test_clone_is_independent) == NULL ||
+      CU_add_test(suite, "clone independent", test_clone_is_independent) ==
+          NULL ||
       CU_add_test(suite, "NULL safety", test_null_safety) == NULL)
     return 1;
   return 0;
