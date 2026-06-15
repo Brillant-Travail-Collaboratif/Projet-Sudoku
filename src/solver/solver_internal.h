@@ -12,6 +12,30 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+char solve_hidden_singles_in_line(SudokuTile *line);
+char solve_naked_singles(Grid grid);
+char clean_line(SudokuTile *line);
+char clean_subset(Subset s);
+char clean_grid(Grid grid);
+char solve_hidden_singles(Grid grid);
+char clean_hidden_pairs(Grid grid);
+char clean_naked_triples(Grid grid);
+char clean_hidden_triples(Grid grid);
+
+char clean_naked_pair_in_subset(Subset s);
+char clean_naked_pairs(Grid grid);
+
+char clean_naked_triple_in_subset(Subset s);
+char clean_naked_triples(Grid grid);
+
+char clean_hidden_triples_in_subset(Subset subset);
+char clean_hidden_triples(Grid grid);
+char guess_value(Grid grid);
+
+void back_play(Grid grid);
+void solver_reset_history(void);
+int solver_count_history_suppositions(void);
+
 unsigned char count_candidates(const SudokuTile *tile, char *candidate);
 char remove_tile_possible(SudokuTile *tile, char value);
 char solveHiddenSinglesInSubset(Subset s);
