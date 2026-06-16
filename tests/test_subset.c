@@ -66,6 +66,19 @@ static void test_out_of_range_returns_null(void) {
   delete_grid(g);
 }
 
+static void test_build_and_free_all_subsets_errors(void) {
+  CU_ASSERT_EQUAL(build_all_subsets(NULL), 1);
+  free_all_subsets(NULL);
+
+  Grid g = create_grid();
+  CU_ASSERT_PTR_NOT_NULL_FATAL(g);
+  free_all_subsets(&g->allSubsets);
+  for (int i = 0; i < SUBSET_COUNT; i++)
+    CU_ASSERT_PTR_NULL(g->allSubsets.subsets[i]);
+  CU_ASSERT_EQUAL(build_all_subsets(g), 0);
+  delete_grid(g);
+}
+
 int register_subset_tests(void) {
   CU_pSuite suite = CU_add_suite("subset", NULL, NULL);
   if (suite == NULL)
@@ -77,7 +90,9 @@ int register_subset_tests(void) {
       CU_add_test(suite, "build all subsets",
                   test_build_all_subsets_covers_grid) == NULL ||
       CU_add_test(suite, "out of range -> NULL",
-                  test_out_of_range_returns_null) == NULL)
+                  test_out_of_range_returns_null) == NULL ||
+      CU_add_test(suite, "build/free all subset errors",
+                  test_build_and_free_all_subsets_errors) == NULL)
     return 1;
   return 0;
 }
