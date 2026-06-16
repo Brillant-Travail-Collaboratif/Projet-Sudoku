@@ -9,5 +9,5 @@ int register_tile_tests(void);
 int register_tables_tests(void);
 int register_subset_tests(void);
 int register_display_tests(void);
-
+int register_cli_tests(void);
 #endif /* TEST_SUITES_H */

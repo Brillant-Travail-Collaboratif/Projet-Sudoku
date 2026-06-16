@@ -79,7 +79,8 @@ if(BUILD_TESTING)
                         tests/test_io.c
                         tests/test_generator.c
                         tests/test_tables.c
-                        tests/test_display.c)
+                        tests/test_display.c
+                        tests/test_cli.c)
                 target_include_directories(sudoku_tests PRIVATE ${CUNIT_INCLUDE_DIR})
                 target_link_libraries(sudoku_tests PRIVATE sudoku_core ${CUNIT_LIBRARY})
 
