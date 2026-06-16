@@ -6,6 +6,7 @@
 #include "../src/sudoku_types/type_difficulty.h"
 #include "../src/sudoku_types/type_random.h"
 #include <CUnit/CUnit.h>
+#include <limits.h>
 
 static void test_random_is_deterministic(void) {
   GeneratorRandom a = {12345u};
@@ -72,6 +73,42 @@ static void test_difficulty_to_string(void) {
   CU_ASSERT_STRING_EQUAL(difficulty_to_string((Difficulty)99), "basic");
 }
 
+static void test_target_for_difficulty(void) {
+  DifficultyTarget t = target_for_difficulty(TRIVIAL);
+  CU_ASSERT_EQUAL(t.min_removed, 1);
+  CU_ASSERT_EQUAL(t.max_removed, 40);
+  CU_ASSERT_EQUAL(t.min_suppositions, 0);
+  CU_ASSERT_EQUAL(t.max_suppositions, 0);
+
+  t = target_for_difficulty(BASIC);
+  CU_ASSERT_EQUAL(t.min_removed, 41);
+  CU_ASSERT_EQUAL(t.max_removed, 50);
+  CU_ASSERT_EQUAL(t.min_suppositions, 0);
+  CU_ASSERT_EQUAL(t.max_suppositions, 0);
+
+  t = target_for_difficulty(INTERMEDIATE);
+  CU_ASSERT_EQUAL(t.min_removed, 51);
+  CU_ASSERT_EQUAL(t.max_removed, 64);
+  CU_ASSERT_EQUAL(t.min_suppositions, 0);
+  CU_ASSERT_EQUAL(t.max_suppositions, 0);
+
+  t = target_for_difficulty(DIFFICILE);
+  CU_ASSERT_EQUAL(t.min_removed, 1);
+  CU_ASSERT_EQUAL(t.max_removed, 70);
+  CU_ASSERT_EQUAL(t.min_suppositions, 1);
+  CU_ASSERT_EQUAL(t.max_suppositions, 5);
+
+  t = target_for_difficulty(EXPERT);
+  CU_ASSERT_EQUAL(t.min_removed, 1);
+  CU_ASSERT_EQUAL(t.max_removed, 70);
+  CU_ASSERT_EQUAL(t.min_suppositions, 6);
+  CU_ASSERT_EQUAL(t.max_suppositions, INT_MAX);
+
+  t = target_for_difficulty((Difficulty)99);
+  CU_ASSERT_EQUAL(t.min_removed, 41);
+  CU_ASSERT_EQUAL(t.max_removed, 50);
+}
+
 static void test_generate_is_valid_and_reproducible(void) {
   Grid a = generate_sudoku(BASIC, 1);
   CU_ASSERT_PTR_NOT_NULL_FATAL(a);
@@ -94,6 +131,25 @@ static void test_generate_is_valid_and_reproducible(void) {
   delete_grid(a);
 }
 
+static void test_matches_difficulty_and_removed_count(void) {
+  Grid completed = create_grid();
+  CU_ASSERT_PTR_NOT_NULL_FATAL(completed);
+  for (int i = 0; i < 81; i++)
+    set_grid_value_raw(completed, (i % 9) + 1, (i / 9) + 1,
+                       (char)((i % 9) + 1));
+
+  CU_ASSERT_EQUAL(removed_count(completed), 0);
+  CU_ASSERT_EQUAL(removed_count(NULL), 81);
+  CU_ASSERT_EQUAL(matches_difficulty(NULL, BASIC), 0);
+  CU_ASSERT_EQUAL(matches_difficulty(completed, BASIC), 0);
+  delete_grid(completed);
+
+  Grid basic = generate_sudoku(BASIC, 1);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(basic);
+  CU_ASSERT_EQUAL(matches_difficulty(basic, BASIC), 1);
+  delete_grid(basic);
+}
+
 int register_generator_tests(void) {
   CU_pSuite suite = CU_add_suite("generator", NULL, NULL);
   if (suite == NULL)
@@ -106,8 +162,12 @@ int register_generator_tests(void) {
       CU_add_test(suite, "parse difficulty", test_parse_difficulty) == NULL ||
       CU_add_test(suite, "difficulty to string", test_difficulty_to_string) ==
           NULL ||
+      CU_add_test(suite, "target for difficulty", test_target_for_difficulty) ==
+          NULL ||
       CU_add_test(suite, "generate valid+reproducible",
-                  test_generate_is_valid_and_reproducible) == NULL)
+                  test_generate_is_valid_and_reproducible) == NULL ||
+      CU_add_test(suite, "matches difficulty and removed count",
+                  test_matches_difficulty_and_removed_count) == NULL)
     return 1;
   return 0;
 }
