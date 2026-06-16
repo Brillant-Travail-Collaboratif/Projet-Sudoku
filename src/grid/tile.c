@@ -34,6 +34,9 @@ char is_value_valid(char value) {
 }
 
 char is_possibles_valid(const char possible[NUMBER_OF_POSSIBLE]) {
+  if (possible == NULL)
+    return 1;
+
   for (unsigned char i = 0; i < NUMBER_OF_POSSIBLE; i++) {
     if (possible[i] < 0 || possible[i] > 1)
       return 1;

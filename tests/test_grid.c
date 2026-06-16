@@ -54,6 +54,57 @@ static void test_set_raw_does_not_journal(void) {
   delete_grid(grid);
 }
 
+static void test_set_raw_rejects_invalid_input(void) {
+  Grid grid = create_grid();
+  CU_ASSERT_EQUAL(set_grid_value_raw(NULL, 1, 1, 4), 1);
+  CU_ASSERT_EQUAL(set_grid_value_raw(grid, 0, 1, 4), 1);
+  CU_ASSERT_EQUAL(set_grid_value_raw(grid, 1, 10, 4), 1);
+  CU_ASSERT_EQUAL(set_grid_value_raw(grid, 1, 1, 10), 1);
+  CU_ASSERT_EQUAL(set_grid_value_raw(grid, 1, 1, -1), 1);
+  CU_ASSERT_EQUAL(grid_filled_count(grid), 0);
+  delete_grid(grid);
+}
+
+static void test_reset_candidates_rebuilds_from_values(void) {
+  Grid grid = create_grid();
+  set_grid_value_raw(grid, 1, 1, 5);
+  char *filled = get_grid_possibles_xy(grid, 1, 1);
+  char *empty = get_grid_possibles_xy(grid, 2, 1);
+  for (int d = 0; d < NUMBER_OF_POSSIBLE; d++) {
+    filled[d] = 1;
+    empty[d] = 0;
+  }
+
+  reset_grid_candidates(grid);
+
+  for (int d = 0; d < NUMBER_OF_POSSIBLE; d++) {
+    CU_ASSERT_EQUAL(filled[d], d == 4 ? 1 : 0);
+    CU_ASSERT_EQUAL(empty[d], 1);
+  }
+  reset_grid_candidates(NULL);
+  delete_grid(grid);
+}
+
+static void test_set_grid_possibles(void) {
+  Grid grid = create_grid();
+  char possible[NUMBER_OF_POSSIBLE] = {0};
+  possible[1] = 1;
+  possible[7] = 1;
+
+  CU_ASSERT_EQUAL(set_grid_possibles_xy(grid, 2, 2, possible), 0);
+  char *stored = get_grid_possibles_xy(grid, 2, 2);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(stored);
+  for (int d = 0; d < NUMBER_OF_POSSIBLE; d++)
+    CU_ASSERT_EQUAL(stored[d], possible[d]);
+
+  possible[0] = 2;
+  CU_ASSERT_EQUAL(set_grid_possibles_xy(grid, 2, 2, possible), 1);
+  CU_ASSERT_EQUAL(set_grid_possibles_xy(grid, 0, 2, possible), 1);
+  CU_ASSERT_EQUAL(set_grid_possibles_xy(NULL, 2, 2, possible), 1);
+  CU_ASSERT_EQUAL(set_grid_possibles_xy(grid, 2, 2, NULL), 1);
+  delete_grid(grid);
+}
+
 static void test_clone_is_independent(void) {
   Grid grid = create_grid();
   set_grid_value_xy(grid, 1, 1, 9, 0);
@@ -85,6 +136,11 @@ int register_grid_tests(void) {
       CU_add_test(suite, "out-of-bounds rejected",
                   test_value_bounds_are_rejected) == NULL ||
       CU_add_test(suite, "raw set", test_set_raw_does_not_journal) == NULL ||
+      CU_add_test(suite, "raw set rejects invalid input",
+                  test_set_raw_rejects_invalid_input) == NULL ||
+      CU_add_test(suite, "reset candidates",
+                  test_reset_candidates_rebuilds_from_values) == NULL ||
+      CU_add_test(suite, "set possibles", test_set_grid_possibles) == NULL ||
       CU_add_test(suite, "clone independent", test_clone_is_independent) ==
           NULL ||
       CU_add_test(suite, "NULL safety", test_null_safety) == NULL)
