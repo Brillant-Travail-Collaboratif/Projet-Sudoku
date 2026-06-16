@@ -9,7 +9,7 @@ int main(void) {
   if (register_grid_tests() != 0 || register_tile_tests() != 0 ||
       register_generator_tests() != 0 || register_solver_tests() != 0 ||
       register_io_tests() != 0 || register_tables_tests() != 0 ||
-      register_subset_tests() != 0) {
+      register_subset_tests() != 0 || register_display_tests() != 0) {
     CU_cleanup_registry();
     return CU_get_error();
   }
