@@ -1,4 +1,3 @@
-#include "solver.h"
 #include "solver_internal.h"
 #include <stddef.h>
 
@@ -665,10 +664,11 @@ char solve_counting(Grid grid, int *supposition_count) {
     return 0;
   solver_reset_history();
   reset_grid_candidates(grid);
+  deduction_count = 0;
   if (supposition_count != NULL)
     *supposition_count = 0;
 
-  while (1) {
+  for (long round = 0; round < MAX_SOLVE_ROUNDS; round++) {
     deduce_until_stable(grid);
 
     if (!is_grid_valid(grid)) {
@@ -686,6 +686,7 @@ char solve_counting(Grid grid, int *supposition_count) {
     if (supposition_count != NULL)
       (*supposition_count)++;
   }
+  return 0;
 }
 
 char solve(Grid grid) { return solve_counting(grid, NULL); }
