@@ -53,37 +53,45 @@ int cmp_strings(const void *a, const void *b) {
 
 void solve_and_show(Grid grid, char verbose) {
   display_values(grid);
-  refresh();
 
   int suppositions = 0;
   char solved = solve_with_stats(grid, &suppositions);
 
   display_values(grid);
-  printw("%s\n", solved ? "Solved" : "Could not fully solve");
+  printf("%s\n", solved ? "Solved" : "Could not fully solve");
   if (verbose)
-    printw("Suppositions: %d   Deductions: %d\n", suppositions,
+    printf("Suppositions: %d   Deductions: %d\n", suppositions,
            deduction_count);
-  refresh();
 }
 
 Grid prepare_grid(const CliOptions *options) {
   if (options->load_file != NULL)
     return load_grid_from_file(options->load_file);
 
-  printw("Generating %s sudoku with seed %u, please wait ...\n",
-         difficulty_to_string(options->difficulty), options->seed);
-  refresh();
+  if (options->interactive) {
+    printw("Generating %s sudoku with seed %u, please wait ...\n",
+           difficulty_to_string(options->difficulty), options->seed);
+    refresh();
+  } else {
+    printf("Generating %s sudoku with seed %u, please wait ...\n",
+           difficulty_to_string(options->difficulty), options->seed);
+  }
   return generate_sudoku(options->difficulty, options->seed);
 }
 
 int run_grid_mode(CliOptions *options) {
-  SCREEN *screen = cli_start_curses();
-  if (screen == NULL)
-    return 1;
+  SCREEN *screen = NULL;
+
+  if (options->interactive) {
+    screen = cli_start_curses();
+    if (screen == NULL)
+      return 1;
+  }
 
   Grid grid = prepare_grid(options);
   if (grid == NULL) {
-    cli_end_curses(screen, options);
+    if (screen != NULL)
+      cli_end_curses(screen, options);
     if (options->load_file != NULL) {
       fprintf(stderr, "Could not load sudoku from '%s'\n", options->load_file);
     } else {
@@ -102,13 +110,15 @@ int run_grid_mode(CliOptions *options) {
     if (save_grid_to_file(options->save_filepath, grid)) {
       fprintf(stderr, "Could not save grid to '%s'\n", options->save_filepath);
       delete_grid(grid);
-      cli_end_curses(screen, options);
+      if (screen != NULL)
+        cli_end_curses(screen, options);
       return 1;
     }
   }
 
   delete_grid(grid);
-  cli_end_curses(screen, options);
+  if (screen != NULL)
+    cli_end_curses(screen, options);
   return 0;
 }
 

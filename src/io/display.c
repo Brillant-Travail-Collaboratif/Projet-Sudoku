@@ -1,6 +1,24 @@
 #include "display_internal.h"
 
 void display_values(Grid grid) {
+  if (grid == NULL)
+    return;
+
+  for (unsigned char y = 1; y <= GRID_SIDE; y++) {
+    if ((y - 1) % BOX_SIDE == 0)
+      printf("%s", ROW_SEPARATOR_FINAL);
+    for (unsigned char x = 1; x <= GRID_SIDE; x++) {
+      if ((x - 1) % BOX_SIDE == 0)
+        printf("| ");
+      const char value = get_grid_value_xy(grid, x, y);
+      printf("%c ", value == 0 ? ' ' : (char)('0' + value));
+    }
+    printf("|\n");
+  }
+  printf("%s", ROW_SEPARATOR_FINAL);
+}
+
+void display_values_curses(Grid grid) {
   clear();
   if (grid == NULL)
     return;
@@ -53,7 +71,7 @@ void display_possibles(Grid grid) {
 }
 
 void start_grid_tui(Grid grid) {
-  display_values(grid);
+  display_values_curses(grid);
   printw("Press s to solve\n");
   printw("Press q to quit\n");
   move(1, 2);
@@ -99,7 +117,7 @@ void start_grid_tui(Grid grid) {
     if (y >= 7)
       mvy++;
 
-    display_values(grid);
+    display_values_curses(grid);
     printw("Press s to solve\n");
     printw("Press q to quit\n");
     refresh();
