@@ -23,7 +23,8 @@
 typedef struct CliOptions {
   Difficulty difficulty;
   unsigned int seed;
-  char *file;
+  char *load_file;
+  char *save_filepath;
   const char *benchmark_dir;
   char verbose;
   char interactive;

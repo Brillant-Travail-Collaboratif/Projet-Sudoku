@@ -1,6 +1,6 @@
 #include "read.h"
 
-Grid load_sudoku_from_file(const char *filename) {
+Grid load_grid_from_file(const char *filename) {
   if (filename == NULL)
     return NULL;
   FILE *file = fopen(filename, "r");
@@ -30,12 +30,12 @@ Grid load_sudoku_from_file(const char *filename) {
   return grid;
 }
 
-int save_sodoku_to_file(const char *filename, Grid grid) {
+int save_grid_to_file(const char *filename, Grid grid) {
   if ((filename == NULL) || (grid == NULL))
-    return -1;
+    return 1;
   FILE *file = fopen(filename, "w");
   if (file == NULL)
-    return -1;
+    return 1;
   for (unsigned char row = 0; row < 9; row++) {
     for (unsigned char column = 0; column < 9; column++) {
       int value = get_grid_value_xy(grid, column + 1, row + 1);
