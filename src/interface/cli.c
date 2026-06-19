@@ -102,13 +102,14 @@ int run_grid_mode(CliOptions *options) {
   }
 
   if (options->interactive)
-    start_grid_tui(grid);
+    start_grid_tui(&grid);
   else
     solve_and_show(grid, options->verbose);
 
-  if (options->save_filepath != NULL) {
-    if (save_grid_to_file(options->save_filepath, grid)) {
-      fprintf(stderr, "Could not save grid to '%s'\n", options->save_filepath);
+  if (options->write_filepath != NULL) {
+    if (write_grid_to_file(options->write_filepath, grid)) {
+      fprintf(stderr, "Could not write grid to '%s'\n",
+              options->write_filepath);
       delete_grid(grid);
       if (screen != NULL)
         cli_end_curses(screen, options);
@@ -132,7 +133,7 @@ void print_usage(void) {
       "  -b, -benchmark [DIR]      solve every *.txt in DIR (default tables)\n"
       "  -g, -generate LEVEL       generate a LEVEL difficulty\n"
       "  -s, -seed NUMBER          set a seed for the random number generator\n"
-      "  -a, -save FILE            save grid to file\n"
+      "  -w, -write FILE           write grid to file\n"
       "  -h, -help                 show this help\n");
 }
 
@@ -194,13 +195,13 @@ int parse_options(int argc, char **argv, CliOptions *options) {
         fprintf(stderr, "Error: %s requires a number\n", argv[i]);
         return 0;
       }
-    } else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "-save") == 0) {
-      if (options->save_filepath != NULL) {
-        fprintf(stderr, "Error: save file was provided more than once\n");
+    } else if (strcmp(argv[i], "-w") == 0 || strcmp(argv[i], "-write") == 0) {
+      if (options->write_filepath != NULL) {
+        fprintf(stderr, "Error: write file was provided more than once\n");
         return 0;
       }
       if (i + 1 < argc && argv[i + 1][0] != '-') {
-        options->save_filepath = argv[++i];
+        options->write_filepath = argv[++i];
       } else {
         fprintf(stderr, "Error: %s requires a file\n", argv[i]);
         return 0;
@@ -214,7 +215,7 @@ int parse_options(int argc, char **argv, CliOptions *options) {
   if (options->benchmark &&
       (options->interactive || options->load_file != NULL ||
        options->has_difficulty || options->has_seed ||
-       options->save_filepath)) {
+       options->write_filepath)) {
     fprintf(stderr,
             "Error: benchmark mode can only be combined with verbose mode\n");
     return 0;
@@ -232,10 +233,7 @@ int parse_options(int argc, char **argv, CliOptions *options) {
 
 int benchmark_one(const char *dir, const char *fname) {
   char path[512];
-  if (strchr(dir, '/') != NULL)
-    snprintf(path, sizeof(path), "%s/%s", dir, fname);
-  else
-    snprintf(path, sizeof(path), "../%s/%s", dir, fname);
+  snprintf(path, sizeof(path), "%s/%s", dir, fname);
 
   Grid grid = load_grid_from_file(path);
   if (grid == NULL) {
@@ -259,10 +257,8 @@ int benchmark_one(const char *dir, const char *fname) {
 int run_benchmark(const char *dir) {
   const char *prefix = (strchr(dir, '/') != NULL) ? "" : "../";
   char *fullpath = malloc(strlen(dir) + strlen(prefix) + 1);
-  if (fullpath == NULL) {
-    free(fullpath);
+  if (fullpath == NULL)
     return 1;
-  }
   sprintf(fullpath, "%s%s", prefix, dir);
 
   DIR *d = opendir(fullpath);
@@ -295,7 +291,7 @@ int run_benchmark(const char *dir) {
 
   clock_t t_all = clock();
   for (int i = 0; i < n; i++) {
-    benchmark_one(dir, names[i]);
+    benchmark_one(fullpath, names[i]);
     free(names[i]);
   }
   double dt_all = 1000.0 * (double)(clock() - t_all) / CLOCKS_PER_SEC;

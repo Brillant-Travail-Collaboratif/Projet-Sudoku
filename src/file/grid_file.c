@@ -1,4 +1,4 @@
-#include "read.h"
+#include "grid_file.h"
 
 Grid load_grid_from_file(const char *filename) {
   if (filename == NULL)
@@ -30,7 +30,7 @@ Grid load_grid_from_file(const char *filename) {
   return grid;
 }
 
-int save_grid_to_file(const char *filename, Grid grid) {
+int write_grid_to_file(const char *filename, Grid grid) {
   if ((filename == NULL) || (grid == NULL))
     return 1;
   FILE *file = fopen(filename, "w");

@@ -70,61 +70,6 @@ void display_possibles(Grid grid) {
   refresh();
 }
 
-void start_grid_tui(Grid grid) {
-  display_values_curses(grid);
-  printw("Press s to solve\n");
-  printw("Press q to quit\n");
-  move(1, 2);
-
-  int ch;
-  unsigned char x = 1, y = 1; // 1, 1 is top left
-
-  while ((ch = getch()) != 'q' && ch != '\n') {
-    if (ch == KEY_UP) {
-      if (y - 1 >= 1)
-        y--;
-    } else if (ch == KEY_DOWN) {
-      if (y + 1 <= NUMBER_OF_POSSIBLE)
-        y++;
-    } else if (ch == KEY_LEFT) {
-      if (x - 1 >= 1)
-        x--;
-    } else if (ch == KEY_RIGHT) {
-      if (x + 1 <= NUMBER_OF_POSSIBLE)
-        x++;
-    } else if (ch == '?') {
-      set_grid_value_xy(grid, x, y, 0, 0);
-      refresh();
-    } else if (ch == 's') {
-      solve(grid);
-    } else {
-      ch -= 48;
-      if (ch > 0 && ch <= 9)
-        set_grid_value_xy(grid, x, y, ch, 0);
-    }
-
-    unsigned char mvx, mvy;
-
-    mvx = x * 2;
-    if (x >= 4)
-      mvx += 2;
-    if (x >= 7)
-      mvx += 2;
-
-    mvy = y;
-    if (y >= 4)
-      mvy++;
-    if (y >= 7)
-      mvy++;
-
-    display_values_curses(grid);
-    printw("Press s to solve\n");
-    printw("Press q to quit\n");
-    refresh();
-    move(mvy, mvx);
-  }
-}
-
 void display_subset(Subset s) {
   if (s == NULL) {
     printf("(subset NULL)\n");
