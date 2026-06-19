@@ -1,5 +1,6 @@
 #include "../src/grid/grid.h"
-#include "../src/io/display.h"
+#include "../src/interface/display.h"
+#include "../src/interface/tui.h"
 #include "../src/subset/subset.h"
 #include <CUnit/CUnit.h>
 #include <ncurses.h>
@@ -58,7 +59,7 @@ static void test_start_grid_tui_quits(void) {
   Grid grid = create_grid();
   CU_ASSERT_PTR_NOT_NULL_FATAL(grid);
   ungetch('q');
-  start_grid_tui(grid);
+  start_grid_tui(&grid);
 
   delete_grid(grid);
   stop_test_curses(input, output, screen);
