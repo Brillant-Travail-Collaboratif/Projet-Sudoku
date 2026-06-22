@@ -1,5 +1,5 @@
+#include "../src/file/grid_file.h"
 #include "../src/grid/grid.h"
-#include "../src/io/read.h"
 #include <CUnit/CUnit.h>
 #include <stdio.h>
 
@@ -46,7 +46,7 @@ static void test_save_roundtrip(void) {
   CU_ASSERT_PTR_NOT_NULL_FATAL(g);
 
   const char *out = "/tmp/sudoku_io_out.txt";
-  CU_ASSERT_EQUAL(save_grid_to_file(out, g), 0);
+  CU_ASSERT_EQUAL(write_grid_to_file(out, g), 0);
 
   Grid back = load_grid_from_file(out);
   CU_ASSERT_PTR_NOT_NULL_FATAL(back);
@@ -61,7 +61,7 @@ static void test_save_roundtrip(void) {
 static void test_missing_and_null(void) {
   CU_ASSERT_PTR_NULL(load_grid_from_file("/tmp/does_not_exist_42.txt"));
   CU_ASSERT_PTR_NULL(load_grid_from_file(NULL));
-  CU_ASSERT_EQUAL(save_grid_to_file(NULL, NULL), 1);
+  CU_ASSERT_EQUAL(write_grid_to_file(NULL, NULL), 1);
 }
 
 static void test_malformed_and_save_errors(void) {
@@ -70,9 +70,9 @@ static void test_malformed_and_save_errors(void) {
 
   Grid g = create_grid();
   CU_ASSERT_PTR_NOT_NULL_FATAL(g);
-  CU_ASSERT_EQUAL(save_grid_to_file(NULL, g), 1);
-  CU_ASSERT_EQUAL(save_grid_to_file("/tmp/sudoku_missing_dir/out.txt", g), 1);
-  CU_ASSERT_EQUAL(save_grid_to_file(k_tmp, NULL), 1);
+  CU_ASSERT_EQUAL(write_grid_to_file(NULL, g), 1);
+  CU_ASSERT_EQUAL(write_grid_to_file("/tmp/sudoku_missing_dir/out.txt", g), 1);
+  CU_ASSERT_EQUAL(write_grid_to_file(k_tmp, NULL), 1);
   delete_grid(g);
 }
 
