@@ -22,7 +22,7 @@ static void test_load_valid(void) {
                     "? 6 ? ? ? ? 2 8 ?\n"
                     "? ? ? 4 1 9 ? ? 5\n"
                     "? ? ? ? 8 ? ? 7 9\n");
-  Grid g = load_sudoku_from_file(k_tmp);
+  Grid g = load_grid_from_file(k_tmp);
   CU_ASSERT_PTR_NOT_NULL_FATAL(g);
   CU_ASSERT_EQUAL(get_grid_value_xy(g, 1, 1), 5);
   CU_ASSERT_EQUAL(get_grid_value_xy(g, 2, 1), 3);
@@ -42,13 +42,13 @@ static void test_save_roundtrip(void) {
                     "? ? ? ? ? ? ? ? ?\n"
                     "? ? ? ? ? ? ? ? ?\n"
                     "? ? ? ? ? ? ? ? ?\n");
-  Grid g = load_sudoku_from_file(k_tmp);
+  Grid g = load_grid_from_file(k_tmp);
   CU_ASSERT_PTR_NOT_NULL_FATAL(g);
 
   const char *out = "/tmp/sudoku_io_out.txt";
   CU_ASSERT_EQUAL(write_grid_to_file(out, g), 0);
 
-  Grid back = load_sudoku_from_file(out);
+  Grid back = load_grid_from_file(out);
   CU_ASSERT_PTR_NOT_NULL_FATAL(back);
   for (unsigned char y = 1; y <= 9; y++)
     for (unsigned char x = 1; x <= 9; x++)
@@ -66,7 +66,7 @@ static void test_missing_and_null(void) {
 
 static void test_malformed_and_save_errors(void) {
   write_file(k_tmp, "1 ? 3\n");
-  CU_ASSERT_PTR_NULL(load_sudoku_from_file(k_tmp));
+  CU_ASSERT_PTR_NULL(load_grid_from_file(k_tmp));
 
   Grid g = create_grid();
   CU_ASSERT_PTR_NOT_NULL_FATAL(g);

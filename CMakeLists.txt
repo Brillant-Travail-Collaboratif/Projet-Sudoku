@@ -9,18 +9,27 @@ set(LDFLAGS "")
 find_package(Curses REQUIRED)
 
 set(SUDOKU_INCLUDE_DIRS
-        src/cli
+        src/file
+        src/interface
         src/grid
         src/generator
-        src/io
         src/solver
         src/subset
         src/sudoku_types)
 
 set(SUDOKU_SOURCES
-        src/cli/cli.c
-        src/cli/cli.h
-        src/cli/cli_internal.h
+        src/file/grid_file.c
+        src/file/grid_file.h
+        src/interface/benchmark.h
+        src/interface/cli.c
+        src/interface/cli.h
+        src/interface/cli_internal.h
+        src/interface/display.c
+        src/interface/display.h
+        src/interface/display_internal.h
+        src/interface/tui.c
+        src/interface/tui.h
+        src/interface/tui_internal.h
         src/grid/grid.c
         src/grid/grid.h
         src/grid/grid_internal.h
@@ -35,17 +44,9 @@ set(SUDOKU_SOURCES
         src/generator/random.c
         src/generator/random.h
         src/generator/random_internal.h
-        src/io/io.c
-        src/io/io.h
-        src/io/io_internal.h
-        src/io/read.c
-        src/io/read.h
         src/solver/solver.c
         src/solver/solver.h
         src/solver/solver_internal.h
-        src/io/display.c
-        src/io/display.h
-        src/io/display_internal.h
         src/subset/subset.c
         src/subset/subset.h
         src/subset/subset_internal.h)

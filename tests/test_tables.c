@@ -41,7 +41,7 @@ static void test_solve_all_tables(void) {
   char path[512];
   for (size_t i = 0; i < sizeof(k_tables) / sizeof(k_tables[0]); i++) {
     snprintf(path, sizeof(path), "../%s/%s", TABLES_DIR, k_tables[i].file);
-    Grid g = load_sudoku_from_file(path);
+    Grid g = load_grid_from_file(path);
     CU_ASSERT_PTR_NOT_NULL_FATAL(g);
 
     clock_t t0 = clock();
