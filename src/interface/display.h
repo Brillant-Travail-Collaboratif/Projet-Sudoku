@@ -6,7 +6,6 @@
 
 void display_values(Grid grid);
 void display_possibles(Grid grid);
-void start_grid_tui(Grid grid);
 void display_subset(Subset s);
 
 #endif /* DISPLAY_H */

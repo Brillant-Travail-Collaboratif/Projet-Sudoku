@@ -43,8 +43,8 @@ char *make_table_path(const char *path) {
 void free_options(CliOptions *options) {
   if (options == NULL)
     return;
-  free(options->file);
-  options->file = NULL;
+  free(options->load_file);
+  options->load_file = NULL;
 }
 
 int cmp_strings(const void *a, const void *b) {
@@ -53,39 +53,47 @@ int cmp_strings(const void *a, const void *b) {
 
 void solve_and_show(Grid grid, char verbose) {
   display_values(grid);
-  refresh();
 
   int suppositions = 0;
   char solved = solve_with_stats(grid, &suppositions);
 
   display_values(grid);
-  printw("%s\n", solved ? "Solved" : "Could not fully solve");
+  printf("%s\n", solved ? "Solved" : "Could not fully solve");
   if (verbose)
-    printw("Suppositions: %d   Deductions: %d\n", suppositions,
+    printf("Suppositions: %d   Deductions: %d\n", suppositions,
            deduction_count);
-  refresh();
 }
 
 Grid prepare_grid(const CliOptions *options) {
-  if (options->file != NULL)
-    return load_sudoku_from_file(options->file);
+  if (options->load_file != NULL)
+    return load_grid_from_file(options->load_file);
 
-  printw("Generating %s sudoku with seed %u, please wait ...\n",
-         difficulty_to_string(options->difficulty), options->seed);
-  refresh();
+  if (options->interactive) {
+    printw("Generating %s sudoku with seed %u, please wait ...\n",
+           difficulty_to_string(options->difficulty), options->seed);
+    refresh();
+  } else {
+    printf("Generating %s sudoku with seed %u, please wait ...\n",
+           difficulty_to_string(options->difficulty), options->seed);
+  }
   return generate_sudoku(options->difficulty, options->seed);
 }
 
 int run_grid_mode(CliOptions *options) {
-  SCREEN *screen = cli_start_curses();
-  if (screen == NULL)
-    return 1;
+  SCREEN *screen = NULL;
+
+  if (options->interactive) {
+    screen = cli_start_curses();
+    if (screen == NULL)
+      return 1;
+  }
 
   Grid grid = prepare_grid(options);
   if (grid == NULL) {
-    cli_end_curses(screen, options);
-    if (options->file != NULL) {
-      fprintf(stderr, "Could not load sudoku from '%s'\n", options->file);
+    if (screen != NULL)
+      cli_end_curses(screen, options);
+    if (options->load_file != NULL) {
+      fprintf(stderr, "Could not load sudoku from '%s'\n", options->load_file);
     } else {
       fprintf(stderr, "Could not generate a %s sudoku with seed %u\n",
               difficulty_to_string(options->difficulty), options->seed);
@@ -94,28 +102,43 @@ int run_grid_mode(CliOptions *options) {
   }
 
   if (options->interactive)
-    start_grid_tui(grid);
+    start_grid_tui(&grid);
   else
     solve_and_show(grid, options->verbose);
 
+  if (options->write_filepath != NULL) {
+    if (write_grid_to_file(options->write_filepath, grid)) {
+      fprintf(stderr, "Could not write grid to '%s'\n",
+              options->write_filepath);
+      delete_grid(grid);
+      if (screen != NULL)
+        cli_end_curses(screen, options);
+      return 1;
+    }
+  }
+
   delete_grid(grid);
-  cli_end_curses(screen, options);
+  if (screen != NULL)
+    cli_end_curses(screen, options);
   return 0;
 }
 
 void print_usage(void) {
   fprintf(
       stderr,
-      "Usage: Projet_Sudoku [options] [DIFFICULTY] [SEED]\n"
+      "Usage: Projet_Sudoku [options]\n"
       "  -i, -interactive          edit the grid in the TUI\n"
       "  -l, -load FILE            load a grid from FILE\n"
       "  -v, -verbose              show solver statistics\n"
       "  -b, -benchmark [DIR]      solve every *.txt in DIR (default tables)\n"
+      "  -g, -generate LEVEL       generate a LEVEL difficulty\n"
+      "  -s, -seed NUMBER          set a seed for the random number generator\n"
+      "  -w, -write FILE           write grid to file\n"
       "  -h, -help                 show this help\n");
 }
 
 int parse_options(int argc, char **argv, CliOptions *options) {
-  *options = (CliOptions){BASIC, 1u, NULL, NULL, 0, 0, 0, 0, 0, 0};
+  *options = (CliOptions){BASIC, 1u, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0};
 
   for (int i = 1; i < argc; i++) {
     Difficulty parsed;
@@ -123,13 +146,14 @@ int parse_options(int argc, char **argv, CliOptions *options) {
 
     if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "-help") == 0) {
       options->help = 1;
+      return 1;
     } else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "-verbose") == 0) {
       options->verbose = 1;
     } else if (strcmp(argv[i], "-i") == 0 ||
                strcmp(argv[i], "-interactive") == 0) {
       options->interactive = 1;
     } else if (strcmp(argv[i], "-l") == 0 || strcmp(argv[i], "-load") == 0) {
-      if (options->file != NULL) {
+      if (options->load_file != NULL) {
         fprintf(stderr, "Error: load file was provided more than once\n");
         return 0;
       }
@@ -137,8 +161,8 @@ int parse_options(int argc, char **argv, CliOptions *options) {
         fprintf(stderr, "Error: %s requires a file\n", argv[i]);
         return 0;
       }
-      options->file = make_table_path(argv[++i]);
-      if (options->file == NULL) {
+      options->load_file = make_table_path(argv[++i]);
+      if (options->load_file == NULL) {
         fprintf(stderr, "Error: could not allocate load file path\n");
         return 0;
       }
@@ -147,29 +171,60 @@ int parse_options(int argc, char **argv, CliOptions *options) {
       options->benchmark = 1;
       if (i + 1 < argc && argv[i + 1][0] != '-')
         options->benchmark_dir = argv[++i];
-    } else if (parse_difficulty(argv[i], &parsed)) {
-      options->difficulty = parsed;
-      options->has_difficulty = 1;
-    } else {
-      unsigned long seed = strtoul(argv[i], &end, 10);
-      if (end != argv[i] && *end == '\0') {
-        options->seed = (unsigned int)seed;
-        options->has_seed = 1;
+    } else if (strcmp(argv[i], "-g") == 0 ||
+               strcmp(argv[i], "-generate") == 0) {
+      if (i + 1 < argc && argv[i + 1][0] != '-' &&
+          parse_difficulty(argv[++i], &parsed)) {
+        options->difficulty = parsed;
+        options->has_difficulty = 1;
       } else {
-        fprintf(stderr, "Error: unsupported argument '%s'\n", argv[i]);
+        fprintf(stderr, "Error: %s requires a difficulty\n", argv[i]);
         return 0;
       }
+    } else if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "-seed") == 0) {
+      if (i + 1 < argc && argv[i + 1][0] != '-') {
+        unsigned long seed = strtoul(argv[++i], &end, 10);
+        if (end != argv[i] && *end == '\0') {
+          options->seed = (unsigned int)seed;
+          options->has_seed = 1;
+        } else {
+          fprintf(stderr, "Error: %s requires a number\n", argv[i]);
+          return 0;
+        }
+      } else {
+        fprintf(stderr, "Error: %s requires a number\n", argv[i]);
+        return 0;
+      }
+    } else if (strcmp(argv[i], "-w") == 0 || strcmp(argv[i], "-write") == 0) {
+      if (options->write_filepath != NULL) {
+        fprintf(stderr, "Error: write file was provided more than once\n");
+        return 0;
+      }
+      if (i + 1 < argc && argv[i + 1][0] != '-') {
+        options->write_filepath = argv[++i];
+      } else {
+        fprintf(stderr, "Error: %s requires a file\n", argv[i]);
+        return 0;
+      }
+    } else {
+      fprintf(stderr, "Error: unsupported argument '%s'\n", argv[i]);
+      return 0;
     }
   }
 
-  if (options->help)
-    return 1;
-
   if (options->benchmark &&
-      (options->interactive || options->verbose || options->file != NULL ||
-       options->has_difficulty || options->has_seed)) {
-    fprintf(stderr, "Error: benchmark mode cannot be combined with solve or "
-                    "interactive options\n");
+      (options->interactive || options->load_file != NULL ||
+       options->has_difficulty || options->has_seed ||
+       options->write_filepath)) {
+    fprintf(stderr,
+            "Error: benchmark mode can only be combined with verbose mode\n");
+    return 0;
+  }
+
+  if (options->load_file != NULL &&
+      (options->benchmark || options->has_difficulty || options->has_seed)) {
+    fprintf(stderr, "Error: load mode can only be combined with verbose or "
+                    "interactive mode\n");
     return 0;
   }
 
@@ -178,12 +233,9 @@ int parse_options(int argc, char **argv, CliOptions *options) {
 
 int benchmark_one(const char *dir, const char *fname) {
   char path[512];
-  if (strchr(dir, '/') != NULL)
-    snprintf(path, sizeof(path), "%s/%s", dir, fname);
-  else
-    snprintf(path, sizeof(path), "../%s/%s", dir, fname);
+  snprintf(path, sizeof(path), "%s/%s", dir, fname);
 
-  Grid grid = load_sudoku_from_file(path);
+  Grid grid = load_grid_from_file(path);
   if (grid == NULL) {
     printf("  %-28s LOAD-FAILED\n", fname);
     return 1;
@@ -205,10 +257,8 @@ int benchmark_one(const char *dir, const char *fname) {
 int run_benchmark(const char *dir) {
   const char *prefix = (strchr(dir, '/') != NULL) ? "" : "../";
   char *fullpath = malloc(strlen(dir) + strlen(prefix) + 1);
-  if (fullpath == NULL) {
-    free(fullpath);
+  if (fullpath == NULL)
     return 1;
-  }
   sprintf(fullpath, "%s%s", prefix, dir);
 
   DIR *d = opendir(fullpath);
@@ -241,7 +291,7 @@ int run_benchmark(const char *dir) {
 
   clock_t t_all = clock();
   for (int i = 0; i < n; i++) {
-    benchmark_one(dir, names[i]);
+    benchmark_one(fullpath, names[i]);
     free(names[i]);
   }
   double dt_all = 1000.0 * (double)(clock() - t_all) / CLOCKS_PER_SEC;
