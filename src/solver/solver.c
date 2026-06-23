@@ -648,6 +648,7 @@ void deduce_until_stable(Grid grid) {
     modified |= clean_grid(grid);
     modified |= solve_naked_singles(grid);
     modified |= solve_hidden_singles(grid);
+    modified |= clean_grid(grid);
     modified |= clean_naked_pairs(grid);
     modified |= clean_naked_pairs(grid);
     modified |= clean_hidden_pairs(grid);
