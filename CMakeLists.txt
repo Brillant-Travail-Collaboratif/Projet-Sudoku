@@ -63,8 +63,9 @@ include(CTest)
 
 if(BUILD_TESTING)
         add_test(NAME valgrind_test
-                COMMAND valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1
-                        $<TARGET_FILE:Projet_Sudoku> -benchmark ${CMAKE_SOURCE_DIR}/tables)
+                COMMAND /bin/sh -c
+                "ulimit -n 1024 && exec valgrind --leak-check=full --error-exitcode=1 \"$1\" -benchmark \"$2\""
+                sh $<TARGET_FILE:Projet_Sudoku> ${CMAKE_SOURCE_DIR}/tables)
 
         find_path(CUNIT_INCLUDE_DIR CUnit/CUnit.h)
         find_library(CUNIT_LIBRARY cunit)

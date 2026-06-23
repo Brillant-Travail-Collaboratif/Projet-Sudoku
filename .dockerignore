@@ -1,0 +1,16 @@
+.git/
+.idea/
+.vscode/
+build/
+
+*.a
+*.d
+*.dSYM/
+*.dwo
+*.exe
+*.o
+*.out
+*.so
+*.so.*
+
+cmake-build-*/
