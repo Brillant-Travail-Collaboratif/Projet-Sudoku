@@ -551,6 +551,28 @@ char is_grid_valid(Grid grid) {
   return 1;
 }
 
+static void save_grid_state(Grid grid, Affectation *affectation) {
+  if (grid == NULL || affectation == NULL)
+    return;
+
+  for (int i = 0; i < GRID_SIZE; i++) {
+    affectation->grid_values[i] = grid->allTiles[i].value;
+    for (int d = 0; d < GRID_SIDE; d++)
+      affectation->grid_possibles[i][d] = grid->allTiles[i].possible[d];
+  }
+}
+
+static void restore_grid_state(Grid grid, const Affectation *affectation) {
+  if (grid == NULL || affectation == NULL)
+    return;
+
+  for (int i = 0; i < GRID_SIZE; i++) {
+    grid->allTiles[i].value = affectation->grid_values[i];
+    for (int d = 0; d < GRID_SIDE; d++)
+      grid->allTiles[i].possible[d] = affectation->grid_possibles[i][d];
+  }
+}
+
 char guess_value(Grid grid) {
   for (int expected_count = 2; expected_count <= GRID_SIDE; expected_count++) {
     for (int i = 0; i < GRID_SIZE; i++) {
@@ -568,6 +590,9 @@ char guess_value(Grid grid) {
       }
 
       if (count == expected_count) {
+        if (history_index >= GRID_SIZE)
+          return 0;
+        save_grid_state(grid, &history[history_index]);
         set_tile_value(&grid->allTiles[i], (char)first_val, 1);
         return 1;
       }
@@ -604,24 +629,11 @@ void back_play(Grid grid) {
   if (affectation < 0)
     return;
 
-  SudokuTile *guessedTile = history[affectation].tile;
-  unsigned char guessedValue = history[affectation].value;
+  Affectation failedGuess = history[affectation];
+  SudokuTile *guessedTile = failedGuess.tile;
+  unsigned char guessedValue = failedGuess.value;
 
-  for (int index = affectation; index < history_index; index++) {
-    history[index].tile->value = 0;
-  }
-
-  for (unsigned char tile = 0; tile < NUMBER_OF_TILE_IN_A_GRID; tile++) {
-    if (grid->allTiles[tile].value == 0) {
-      for (unsigned char possible = 0; possible < NUMBER_OF_POSSIBLE;
-           possible++) {
-        grid->allTiles[tile].possible[possible] = 1;
-      }
-    }
-  }
-
-  clean_grid(grid);
-
+  restore_grid_state(grid, &failedGuess);
   if (guessedTile != NULL && guessedValue >= 1 &&
       guessedValue <= NUMBER_OF_POSSIBLE)
     guessedTile->possible[guessedValue - 1] = 0;

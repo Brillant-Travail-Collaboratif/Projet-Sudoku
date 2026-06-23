@@ -32,16 +32,16 @@ static void test_parse_generate_and_seed_flags(void) {
   CU_ASSERT_TRUE(options.has_seed);
   CU_ASSERT_FALSE(options.benchmark);
   CU_ASSERT_PTR_NULL(options.load_file);
-  CU_ASSERT_PTR_NULL(options.save_filepath);
+  CU_ASSERT_PTR_NULL(options.write_filepath);
   free_options(&options);
 }
 
-static void test_parse_save_flag(void) {
+static void test_parse_write_flag(void) {
   CliOptions options;
-  char *argv[] = {"sudoku", "-save", "/tmp/sudoku_cli_out.txt"};
+  char *argv[] = {"sudoku", "-write", "/tmp/sudoku_cli_out.txt"};
 
   CU_ASSERT_TRUE(parse_options(3, argv, &options));
-  CU_ASSERT_STRING_EQUAL(options.save_filepath, "/tmp/sudoku_cli_out.txt");
+  CU_ASSERT_STRING_EQUAL(options.write_filepath, "/tmp/sudoku_cli_out.txt");
   CU_ASSERT_PTR_NULL(options.load_file);
   free_options(&options);
 }
@@ -65,7 +65,7 @@ static void test_parse_rejects_missing_flag_values(void) {
   char *bad_generate[] = {"sudoku", "-generate", "unknown"};
   char *missing_seed[] = {"sudoku", "-seed"};
   char *bad_seed[] = {"sudoku", "-seed", "abc"};
-  char *missing_save[] = {"sudoku", "-save"};
+  char *missing_write[] = {"sudoku", "-write"};
 
   CU_ASSERT_FALSE(parse_options(2, missing_generate, &options));
   free_options(&options);
@@ -75,32 +75,32 @@ static void test_parse_rejects_missing_flag_values(void) {
   free_options(&options);
   CU_ASSERT_FALSE(parse_options(3, bad_seed, &options));
   free_options(&options);
-  CU_ASSERT_FALSE(parse_options(2, missing_save, &options));
+  CU_ASSERT_FALSE(parse_options(2, missing_write, &options));
   free_options(&options);
 }
 
 static void test_parse_rejects_duplicate_files(void) {
   CliOptions options;
   char *duplicate_load[] = {"sudoku", "-load", "a.txt", "-load", "b.txt"};
-  char *duplicate_save[] = {"sudoku", "-save", "a.txt", "-save", "b.txt"};
+  char *duplicate_write[] = {"sudoku", "-write", "a.txt", "-write", "b.txt"};
 
   CU_ASSERT_FALSE(parse_options(5, duplicate_load, &options));
   free_options(&options);
-  CU_ASSERT_FALSE(parse_options(5, duplicate_save, &options));
+  CU_ASSERT_FALSE(parse_options(5, duplicate_write, &options));
   free_options(&options);
 }
 
 static void test_parse_rejects_invalid_mode_combinations(void) {
   CliOptions options;
   char *benchmark_generate[] = {"sudoku", "-benchmark", "-generate", "basic"};
-  char *benchmark_save[] = {"sudoku", "-benchmark", "-save", "out.txt"};
+  char *benchmark_write[] = {"sudoku", "-benchmark", "-write", "out.txt"};
   char *load_generate[] = {"sudoku", "-load", "trivial_table_1.txt",
                            "-generate", "basic"};
   char *load_seed[] = {"sudoku", "-load", "trivial_table_1.txt", "-seed", "7"};
 
   CU_ASSERT_FALSE(parse_options(4, benchmark_generate, &options));
   free_options(&options);
-  CU_ASSERT_FALSE(parse_options(4, benchmark_save, &options));
+  CU_ASSERT_FALSE(parse_options(4, benchmark_write, &options));
   free_options(&options);
   CU_ASSERT_FALSE(parse_options(5, load_generate, &options));
   free_options(&options);
@@ -129,7 +129,7 @@ int register_cli_tests(void) {
                   test_cli_rejects_bad_benchmark_dir) == NULL ||
       CU_add_test(suite, "parse generate and seed flags",
                   test_parse_generate_and_seed_flags) == NULL ||
-      CU_add_test(suite, "parse save flag", test_parse_save_flag) == NULL ||
+      CU_add_test(suite, "parse write flag", test_parse_write_flag) == NULL ||
       CU_add_test(suite, "parse load allows verbose and interactive",
                   test_parse_load_allows_verbose_and_interactive) == NULL ||
       CU_add_test(suite, "parse rejects missing flag values",
