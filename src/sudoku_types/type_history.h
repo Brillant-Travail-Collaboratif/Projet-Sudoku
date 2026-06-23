@@ -10,6 +10,8 @@ typedef struct Affectation {
   SudokuTile *tile;
   char supposed;
   char value;
+  char grid_values[GRID_SIZE];
+  char grid_possibles[GRID_SIZE][GRID_SIDE];
 } Affectation;
 
 extern Affectation history[81];
