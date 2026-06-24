@@ -16,6 +16,8 @@
 #include "tui.h"
 
 #include <dirent.h>
+#include <errno.h>
+#include <limits.h>
 #include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>

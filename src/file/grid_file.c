@@ -3,29 +3,43 @@
 Grid load_grid_from_file(const char *filename) {
   if (filename == NULL)
     return NULL;
+
   FILE *file = fopen(filename, "r");
   if (file == NULL)
     return NULL;
+
   Grid grid = create_grid();
   if (grid == NULL) {
     fclose(file);
     return NULL;
   }
-  char buffer[256];
+
   for (unsigned char row = 0; row < 9; row++) {
-    if (fgets(buffer, sizeof(buffer), file) == NULL) {
-      delete_grid(grid);
-      fclose(file);
-      return NULL;
-    }
     for (unsigned char column = 0; column < 9; column++) {
-      char value = buffer[column * 2];
-      if (value >= '1' && value <= '9')
-        set_grid_value_xy(grid, column + 1, row + 1, value - '0', 0);
-      else
-        set_grid_value_xy(grid, column + 1, row + 1, 0, 0);
+      char symbol;
+      if (fscanf(file, " %c", &symbol) != 1 ||
+          (symbol != '?' && (symbol < '1' || symbol > '9'))) {
+        delete_grid(grid);
+        fclose(file);
+        return NULL;
+      }
+
+      char value = symbol == '?' ? 0 : (char)(symbol - '0');
+      if (set_grid_value_raw(grid, column + 1, row + 1, value) != 0) {
+        delete_grid(grid);
+        fclose(file);
+        return NULL;
+      }
     }
   }
+
+  char extra;
+  if (fscanf(file, " %c", &extra) == 1) {
+    delete_grid(grid);
+    fclose(file);
+    return NULL;
+  }
+
   fclose(file);
   return grid;
 }

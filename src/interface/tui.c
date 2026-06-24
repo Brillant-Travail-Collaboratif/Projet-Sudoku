@@ -99,6 +99,13 @@ char generate_tui_grid(Grid *grid, Difficulty difficulty, unsigned int seed) {
   return 1;
 }
 
+char solve_tui_grid(Grid grid, char *message, size_t size) {
+  char solved = solve(grid);
+  set_tui_message(message, size,
+                  solved ? "Grid solved" : "Could not fully solve grid");
+  return solved;
+}
+
 void save_tui_grid(Grid grid, const char *path, char *message, size_t size) {
   if (write_grid_to_file(path, grid) == 0)
     set_tui_message(message, size, "Grid saved");
@@ -144,8 +151,7 @@ void start_grid_tui(Grid *grid) {
       set_grid_value_xy(*grid, x, y, 0, 0);
       set_tui_message(message, sizeof(message), "");
     } else if (ch == 's') {
-      solve(*grid);
-      set_tui_message(message, sizeof(message), "Grid solved");
+      solve_tui_grid(*grid, message, sizeof(message));
     } else if (ch == 'l') {
       char path[TUI_INPUT_SIZE];
       if (read_tui_line("Load file: ", path, sizeof(path))) {
@@ -182,7 +188,7 @@ void start_grid_tui(Grid *grid) {
       read_tui_line("Benchmark dir (empty = tables): ", dir, sizeof(dir));
       run_tui_benchmark(dir);
       set_tui_message(message, sizeof(message), "Benchmark finished");
-    } else if (isdigit(ch)) {
+    } else if (ch >= '0' && ch <= '9') {
       ch -= '0';
       if (ch > 0 && ch <= 9) {
         set_grid_value_xy(*grid, x, y, ch, 0);

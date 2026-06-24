@@ -183,8 +183,10 @@ int parse_options(int argc, char **argv, CliOptions *options) {
       }
     } else if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "-seed") == 0) {
       if (i + 1 < argc && argv[i + 1][0] != '-') {
+        errno = 0;
         unsigned long seed = strtoul(argv[++i], &end, 10);
-        if (end != argv[i] && *end == '\0') {
+        if (errno != ERANGE && end != argv[i] && *end == '\0' &&
+            seed <= UINT_MAX) {
           options->seed = (unsigned int)seed;
           options->has_seed = 1;
         } else {

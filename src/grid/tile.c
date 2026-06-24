@@ -62,17 +62,18 @@ char set_tile_value(SudokuTile *tile, char value, unsigned char supposed) {
   if (tile == NULL || is_value_valid(value))
     return 1;
 
+  if (value != 0 && history_index >= GRID_SIZE)
+    return 1;
+
   tile->value = value;
 
-  if (value != 0) {
-    for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++)
-      tile->possible[d] = 0;
+  for (unsigned char d = 0; d < NUMBER_OF_POSSIBLE; d++)
+    tile->possible[d] = value == 0 ? 1 : 0;
+
+  if (value != 0)
     tile->possible[value - 1] = 1;
-  }
 
   if (value != 0) {
-    if (history_index > 80)
-      return 1;
     history[history_index].tile = tile;
     history[history_index].value = value;
     history[history_index++].supposed = supposed;
