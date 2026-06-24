@@ -4,6 +4,8 @@
 #include "../src/interface/cli.h"
 #include "../src/interface/cli_internal.h"
 #include <CUnit/CUnit.h>
+#include <limits.h>
+#include <stdio.h>
 #include <string.h>
 
 static void test_cli_help_returns_success(void) {
@@ -118,13 +120,23 @@ static void test_parse_benchmark_allows_verbose(void) {
   free_options(&options);
 }
 
+static void test_parse_rejects_seed_overflow(void) {
+  CliOptions options;
+  char seed_text[32];
+  snprintf(seed_text, sizeof(seed_text), "%lu", (unsigned long)UINT_MAX + 1UL);
+  char *argv[] = {"sudoku", "-seed", seed_text};
+
+  CU_ASSERT_FALSE(parse_options(3, argv, &options));
+  free_options(&options);
+}
+
 int register_cli_tests(void) {
   CU_pSuite suite = CU_add_suite("cli", NULL, NULL);
   if (suite == NULL)
     return 1;
   if (CU_add_test(suite, "help", test_cli_help_returns_success) == NULL ||
       CU_add_test(suite, "bad argument", test_cli_rejects_bad_argument) ==
-          NULL ||
+      NULL ||
       CU_add_test(suite, "bad benchmark dir",
                   test_cli_rejects_bad_benchmark_dir) == NULL ||
       CU_add_test(suite, "parse generate and seed flags",
@@ -139,7 +151,9 @@ int register_cli_tests(void) {
       CU_add_test(suite, "parse rejects invalid mode combinations",
                   test_parse_rejects_invalid_mode_combinations) == NULL ||
       CU_add_test(suite, "parse benchmark allows verbose",
-                  test_parse_benchmark_allows_verbose) == NULL)
+                  test_parse_benchmark_allows_verbose) == NULL ||
+      CU_add_test(suite, "parse rejects seed overflow",
+                  test_parse_rejects_seed_overflow) == NULL)
     return 1;
   return 0;
 }
