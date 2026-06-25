@@ -23,8 +23,7 @@ char solve_naked_singles(Grid grid) {
       continue;
 
     char candidate = 0;
-    const unsigned char count =
-        count_candidates(&grid->cells[i], &candidate);
+    const unsigned char count = count_candidates(&grid->cells[i], &candidate);
     if (count == 1) {
       set_cell_value(&grid->cells[i], candidate, 0);
       modified = 1;
@@ -83,29 +82,6 @@ char remove_cell_candidate(SudokuCell *cell, char value) {
   return 0;
 }
 
-char clean_row(SudokuCell *row) {
-  if (row == NULL)
-    return 0;
-
-  char modified = 0;
-  for (unsigned char i = 0; i < CELLS_PER_UNIT; i++) {
-    const char value = row[i].value;
-    if (value == 0)
-      continue;
-
-    /* Remove the assigned value from every other unsolved cell. */
-    for (unsigned char j = 0; j < CELLS_PER_UNIT; j++) {
-      if (j == i)
-        continue;
-      if (row[j].value != 0)
-        continue;
-      if (remove_cell_candidate(&row[j], value))
-        modified = 1;
-    }
-  }
-  return modified;
-}
-
 char clean_subset(Subset subset) {
   if (subset == NULL)
     return 0;
@@ -123,32 +99,6 @@ char clean_subset(Subset subset) {
         continue;
       if (remove_cell_candidate(subset[j], value))
         modified = 1;
-    }
-  }
-  return modified;
-}
-char solve_hidden_singles_in_row(SudokuCell *row) {
-  if (row == NULL)
-    return 0;
-
-  unsigned char modified = 0;
-  for (unsigned char i = 0; i < CANDIDATE_COUNT; i++) {
-    unsigned char candidateIndex = 0;
-    for (unsigned char j = 0; j < CANDIDATE_COUNT; j++) {
-      char *candidates = get_cell_candidates(&row[j]);
-      if (candidates == NULL)
-        continue;
-      char candidateFlag = candidates[i];
-      if (candidateFlag != 0 && candidateIndex != 0)
-        candidateIndex = j;
-      else if (candidateFlag != 0) {
-        candidateIndex = 0;
-        break;
-      }
-    }
-    if (candidateIndex != 0) {
-      set_cell_value(&row[candidateIndex], i + 1, 0);
-      modified = 1;
     }
   }
   return modified;
@@ -181,8 +131,7 @@ char apply_rule_on_grid(Grid grid, char (*rule)(Subset)) {
   return modified;
 }
 
-unsigned char list_candidates(SudokuCell *cell,
-                              char output[CANDIDATE_COUNT]) {
+unsigned char list_candidates(SudokuCell *cell, char output[CANDIDATE_COUNT]) {
   unsigned char count = 0;
   for (unsigned char d = 0; d < CANDIDATE_COUNT; d++) {
     if (cell->candidates[d])
@@ -607,14 +556,6 @@ void reset_solver_history(void) {
   historyIndex = 0;
 }
 
-int count_history_guesses(void) {
-  int count = 0;
-  for (int i = 0; i < historyIndex; i++)
-    if (solverHistory[i].isGuess)
-      count++;
-  return count;
-}
-
 void backtrack_last_guess(Grid grid) {
   if (grid == NULL || historyIndex <= 0)
     return;
@@ -661,7 +602,7 @@ char has_pending_guess(void) {
   return 0;
 }
 
-char solve_and_count_guesses(Grid grid, int *guessCount) {
+static char solve_and_count_guesses(Grid grid, int *guessCount) {
   if (grid == NULL)
     return 0;
   reset_solver_history();
