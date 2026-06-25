@@ -1,7 +1,3 @@
-//
-// Created by Nicolas Gouaux on 02/06/2026.
-//
-
 #include "subset_internal.h"
 
 Subset allocate_subset(void) {
@@ -82,6 +78,7 @@ char build_all_subsets(Grid grid) {
   SubsetCollection *subsets = &grid->subsets;
   free_all_subsets(subsets);
 
+  /* Subsets are stored as 9 rows, 9 columns, then 9 boxes. */
   for (int unitIndex = 0; unitIndex < CELLS_PER_UNIT; unitIndex++) {
     subsets->items[unitIndex] = get_row_subset(grid, unitIndex);
     subsets->items[9 + unitIndex] = get_column_subset(grid, unitIndex);

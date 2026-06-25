@@ -35,6 +35,8 @@ int find_best_empty_cell(Grid grid) {
   int bestIndex = -1;
   int bestCount = GRID_SIDE + 1;
 
+  /* Seek for the cell with the least number of guesses, less guesses = quicker
+   * for setting the value. */
   for (int i = 0; i < GRID_CELL_COUNT; i++) {
     if (grid->cells[i].value != 0)
       continue;
@@ -57,6 +59,7 @@ char fill_complete_grid(Grid grid, RandomGenerator *random) {
   if (index < 0)
     return is_grid_valid(grid);
 
+  /* Try allowed values in random order and undo failed branches. */
   char values[GRID_SIDE];
   int count = collect_allowed_values(grid, index, values);
   int order[GRID_SIDE];
@@ -101,6 +104,7 @@ char does_solution_match_completed_grid(Grid puzzle, Grid completed) {
 }
 
 char count_solutions(Grid grid, int index, int *count, Grid firstSolution) {
+  /* Two solutions are enough to prove that the puzzle is not unique. */
   if (*count > 1)
     return 1;
 
@@ -136,6 +140,7 @@ char has_unique_matching_solution(Grid puzzle, Grid completed) {
   int solutions = 0;
   char ok = 0;
 
+  /* The only solution must be the completed grid used to build the puzzle. */
   if (check != NULL && firstSolution != NULL && is_grid_valid(check) &&
       count_solutions(check, 0, &solutions, firstSolution)) {
     ok = solutions == 1 && have_same_grid_values(firstSolution, completed) &&
@@ -170,7 +175,9 @@ Grid build_candidate_puzzle(Grid completed, Difficulty difficulty,
     order[i] = i;
   shuffle_integers(random, order, GRID_CELL_COUNT);
 
-  for (int i = 0; i < GRID_CELL_COUNT && count_removed_cells(puzzle) < target; i++) {
+  /* Keep a removed value only when the puzzle still has one solution. */
+  for (int i = 0; i < GRID_CELL_COUNT && count_removed_cells(puzzle) < target;
+       i++) {
     int index = order[i];
     char oldValue = puzzle->cells[index].value;
     if (oldValue == 0)
@@ -195,6 +202,7 @@ Grid build_candidate_puzzle(Grid completed, Difficulty difficulty,
 Grid generate_sudoku(Difficulty difficulty, unsigned int seed) {
   RandomGenerator random = {seed == 0 ? 1u : seed};
 
+  /* Retry because clue removal may miss the requested difficulty. */
   for (int attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt++) {
     Grid completed = create_grid();
     if (completed == NULL)

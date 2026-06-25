@@ -1,6 +1,7 @@
 #include "random_internal.h"
 
 uint32_t generate_next_random(RandomGenerator *random) {
+  /* We use Xorfish for same random on every computer. */
   uint32_t x = random->state;
   if (x == 0)
     x = 0x6d2b79f5u;

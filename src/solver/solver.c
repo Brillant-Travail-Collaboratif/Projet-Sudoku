@@ -36,6 +36,7 @@ char solve_hidden_singles_in_subset(Subset subset) {
   if (subset == NULL)
     return 0;
 
+  /* Place a value when it has only one possible cell in the subset. */
   unsigned char modified = 0;
   for (char value = 1; value <= CELLS_PER_UNIT; value++) {
     char isAlreadyPlaced = 0;
@@ -162,8 +163,7 @@ char clean_naked_pair_in_subset(Subset subset) {
           firstCandidates[1] != secondCandidates[1])
         continue;
 
-      /* Quand on trouve une paire , on nettoie les autres cases inconnues du
-       * subset. */
+      /* A naked pair removes its two values from every other cell. */
       for (unsigned char k = 0; k < CELLS_PER_UNIT; k++) {
         if (k == i || k == j || subset[k]->value != 0)
           continue;
@@ -185,6 +185,7 @@ char clean_hidden_pairs_in_subset(Subset subset) {
   if (subset == NULL)
     return 0;
 
+  /* Store the two positions of each value and its total occurrence count. */
   unsigned char candidates[CANDIDATE_COUNT][3];
 
   for (unsigned char d = 0; d < CANDIDATE_COUNT; d++) {
@@ -219,6 +220,7 @@ char clean_hidden_pairs_in_subset(Subset subset) {
       unsigned char b1 = candidates[d2][0];
       unsigned char b2 = candidates[d2][1];
 
+      /* Two values sharing the same two cells form a hidden pair. */
       if ((a1 == b1 && a2 == b2) || (a1 == b2 && a2 == b1)) {
         for (unsigned char digit = 0; digit < CANDIDATE_COUNT; digit++) {
           if (digit != d1 && digit != d2) {
@@ -275,6 +277,7 @@ char clean_naked_triple_in_subset(Subset subset) {
         char unionValues[CANDIDATE_COUNT];
         int unionSize = 0;
 
+        /* Merge the candidates of the three cells without duplicates. */
         for (int a = 0; a < firstCount; a++) {
           char found = 0;
           for (int b = 0; b < unionSize; b++)
@@ -311,6 +314,7 @@ char clean_naked_triple_in_subset(Subset subset) {
         if (unionSize != 3)
           continue;
 
+        /* These three values cannot appear in another cell of the subset. */
         for (unsigned char l = 0; l < CELLS_PER_UNIT; l++) {
           if (l == i || l == j || l == k || subset[l]->value != 0)
             continue;
@@ -332,6 +336,7 @@ char clean_hidden_triples_in_subset(Subset subset) {
   if (subset == NULL)
     return 0;
 
+  /* Store up to three positions for each value, plus its occurrence count. */
   unsigned char candidates[CANDIDATE_COUNT][4];
 
   for (unsigned char d = 0; d < CANDIDATE_COUNT; d++) {
@@ -368,6 +373,7 @@ char clean_hidden_triples_in_subset(Subset subset) {
         unsigned char unionPositions[3];
         unsigned char unionSize = 0;
 
+        /* A hidden triple must be limited to exactly three cells. */
         for (unsigned char a = 0; a < candidates[d1][3] && a < 3; a++) {
           unsigned char found = 0;
           for (unsigned char b = 0; b < unionSize; b++)
@@ -442,6 +448,7 @@ char clean_hidden_triples_in_subset(Subset subset) {
         if (overflow)
           continue;
 
+        /* Keep only the three triple values in their shared cells. */
         for (unsigned char p = 0; p < unionSize; p++) {
           unsigned char pos = unionPositions[p];
           for (unsigned char digit = 0; digit < CANDIDATE_COUNT; digit++) {
@@ -520,6 +527,7 @@ static void restore_grid_state(Grid grid, const SolverStep *step) {
 }
 
 char guess_cell_value(Grid grid) {
+  /* Guess first in a cell with the fewest candidates. */
   for (int expectedCount = 2; expectedCount <= GRID_SIDE; expectedCount++) {
     for (int i = 0; i < GRID_CELL_COUNT; i++) {
       if (grid->cells[i].value != 0)
@@ -560,6 +568,7 @@ void backtrack_last_guess(Grid grid) {
   if (grid == NULL || historyIndex <= 0)
     return;
 
+  /* Ignore deductions and return to the most recent guess. */
   int stepIndex = historyIndex - 1;
   while (stepIndex >= 0 && solverHistory[stepIndex].isGuess == 0)
     stepIndex--;
@@ -571,6 +580,7 @@ void backtrack_last_guess(Grid grid) {
   SudokuCell *guessedCell = failedGuess.cell;
   unsigned char guessedValue = failedGuess.value;
 
+  /* Restore the snapshot, then remove the value that caused the failure. */
   restore_grid_state(grid, &failedGuess);
   if (guessedCell != NULL && guessedValue >= 1 &&
       guessedValue <= CANDIDATE_COUNT)
@@ -581,6 +591,7 @@ void backtrack_last_guess(Grid grid) {
 
 void deduce_until_stable(Grid grid) {
   char modified;
+  /* Repeat all logical rules until none of them changes the grid. */
   do {
     modified = 0;
     modified |= clean_grid(grid);
@@ -614,6 +625,7 @@ static char solve_and_count_guesses(Grid grid, int *guessCount) {
   for (long round = 0; round < MAX_SOLVE_ROUNDS; round++) {
     deduce_until_stable(grid);
 
+    /* A contradiction rejects the latest guess and tries another value. */
     if (!is_grid_valid(grid)) {
       if (!has_pending_guess())
         return 0;
@@ -624,6 +636,7 @@ static char solve_and_count_guesses(Grid grid, int *guessCount) {
     if (count_filled_cells(grid) == GRID_CELL_COUNT)
       return 1;
 
+    /* Logical rules are stuck, so save the grid and make one guess. */
     if (!guess_cell_value(grid))
       return 0;
     if (guessCount != NULL)
