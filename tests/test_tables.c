@@ -10,28 +10,28 @@
 #define TABLES_DIR "tables"
 #endif
 
-#define PER_GRID_BUDGET_SEC 30.0
+#define PER_GRID_TIME_LIMIT_SECONDS 30.0
 
 static const struct {
   const char *file;
-  int must_solve;
-} k_tables[] = {
+  int mustSolve;
+} TABLE_CASES[] = {
     {"trivial_table_1.txt", 1},      {"trivial_table_2.txt", 1},
     {"basic_table_1.txt", 1},        {"intermediate_table_1.txt", 1},
     {"intermediate_table_2.txt", 1}, {"difficile_table_1.txt", 1},
     {"expert_table_1.txt", 1},       {"expert_table_2.txt", 0},
 };
 
-static int has_no_duplicate(Grid g) {
-  for (int s = 0; s < SUBSET_COUNT; s++) {
+static int has_no_duplicates(Grid grid) {
+  for (int subsetIndex = 0; subsetIndex < SUBSET_COUNT; subsetIndex++) {
     int seen[9] = {0};
-    for (int k = 0; k < 9; k++) {
-      int v = g->allSubsets.subsets[s][k]->value;
-      if (v == 0)
+    for (int cellIndex = 0; cellIndex < 9; cellIndex++) {
+      int value = grid->subsets.items[subsetIndex][cellIndex]->value;
+      if (value == 0)
         continue;
-      if (seen[v - 1])
+      if (seen[value - 1])
         return 0;
-      seen[v - 1] = 1;
+      seen[value - 1] = 1;
     }
   }
   return 1;
@@ -39,23 +39,23 @@ static int has_no_duplicate(Grid g) {
 
 static void test_solve_all_tables(void) {
   char path[512];
-  for (size_t i = 0; i < sizeof(k_tables) / sizeof(k_tables[0]); i++) {
-    snprintf(path, sizeof(path), "../%s/%s", TABLES_DIR, k_tables[i].file);
-    Grid g = load_grid_from_file(path);
-    CU_ASSERT_PTR_NOT_NULL_FATAL(g);
+  for (size_t i = 0; i < sizeof(TABLE_CASES) / sizeof(TABLE_CASES[0]); i++) {
+    snprintf(path, sizeof(path), "../%s/%s", TABLES_DIR, TABLE_CASES[i].file);
+    Grid grid = load_grid_from_file(path);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(grid);
 
-    clock_t t0 = clock();
-    char ok = solve(g);
-    double dt = (double)(clock() - t0) / CLOCKS_PER_SEC;
+    clock_t startTime = clock();
+    char solved = solve(grid);
+    double elapsedSeconds = (double)(clock() - startTime) / CLOCKS_PER_SEC;
 
-    if (k_tables[i].must_solve) {
-      CU_ASSERT_TRUE(ok);
-      CU_ASSERT_EQUAL(grid_filled_count(g), 81);
+    if (TABLE_CASES[i].mustSolve) {
+      CU_ASSERT_TRUE(solved);
+      CU_ASSERT_EQUAL(count_filled_cells(grid), 81);
     }
-    CU_ASSERT_TRUE(has_no_duplicate(g));
-    CU_ASSERT_TRUE(dt < PER_GRID_BUDGET_SEC);
+    CU_ASSERT_TRUE(has_no_duplicates(grid));
+    CU_ASSERT_TRUE(elapsedSeconds < PER_GRID_TIME_LIMIT_SECONDS);
 
-    delete_grid(g);
+    delete_grid(grid);
   }
 }
 

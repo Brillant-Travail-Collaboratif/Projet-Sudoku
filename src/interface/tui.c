@@ -14,11 +14,11 @@ char *make_tui_table_path(const char *path) {
     return copy;
   }
 
-  char *fullpath = malloc(strlen(path) + strlen(prefix) + 1);
-  if (fullpath == NULL)
+  char *fullPath = malloc(strlen(path) + strlen(prefix) + 1);
+  if (fullPath == NULL)
     return NULL;
-  sprintf(fullpath, "%s%s", prefix, path);
-  return fullpath;
+  sprintf(fullPath, "%s%s", prefix, path);
+  return fullPath;
 }
 
 void set_tui_message(char *message, size_t size, const char *text) {
@@ -28,19 +28,19 @@ void set_tui_message(char *message, size_t size, const char *text) {
 }
 
 void move_tui_cursor(unsigned char x, unsigned char y) {
-  unsigned char mvx = x * 2;
+  unsigned char screenColumn = x * 2;
   if (x >= 4)
-    mvx += 2;
+    screenColumn += 2;
   if (x >= 7)
-    mvx += 2;
+    screenColumn += 2;
 
-  unsigned char mvy = y;
+  unsigned char screenRow = y;
   if (y >= 4)
-    mvy++;
+    screenRow++;
   if (y >= 7)
-    mvy++;
+    screenRow++;
 
-  move(mvy, mvx);
+  move(screenRow, screenColumn);
 }
 
 void draw_tui(Grid grid, const char *message, unsigned char x,
@@ -56,13 +56,13 @@ void draw_tui(Grid grid, const char *message, unsigned char x,
 
 char read_tui_line(const char *prompt, char *buffer, size_t size) {
   int row = 0;
-  int col = 0;
+  int column = 0;
 
   if (buffer == NULL || size == 0)
     return 0;
 
-  getmaxyx(stdscr, row, col);
-  (void)col;
+  getmaxyx(stdscr, row, column);
+  (void)column;
   move(row - 2, 0);
   clrtoeol();
   printw("%s", prompt);
@@ -75,12 +75,12 @@ char read_tui_line(const char *prompt, char *buffer, size_t size) {
 }
 
 char load_tui_grid(Grid *grid, const char *path) {
-  char *fullpath = make_tui_table_path(path);
-  if (fullpath == NULL)
+  char *fullPath = make_tui_table_path(path);
+  if (fullPath == NULL)
     return 0;
 
-  Grid loaded = load_grid_from_file(fullpath);
-  free(fullpath);
+  Grid loaded = load_grid_from_file(fullPath);
+  free(fullPath);
   if (loaded == NULL)
     return 0;
 
@@ -99,6 +99,13 @@ char generate_tui_grid(Grid *grid, Difficulty difficulty, unsigned int seed) {
   return 1;
 }
 
+char solve_tui_grid(Grid grid, char *message, size_t size) {
+  char solved = solve(grid);
+  set_tui_message(message, size,
+                  solved ? "Grid solved" : "Could not fully solve grid");
+  return solved;
+}
+
 void save_tui_grid(Grid grid, const char *path, char *message, size_t size) {
   if (write_grid_to_file(path, grid) == 0)
     set_tui_message(message, size, "Grid saved");
@@ -106,14 +113,15 @@ void save_tui_grid(Grid grid, const char *path, char *message, size_t size) {
     set_tui_message(message, size, "Could not save grid");
 }
 
-void run_tui_benchmark(const char *dir) {
+void run_tui_benchmark(const char *directory) {
   def_prog_mode();
   endwin();
-  run_benchmark((dir == NULL || dir[0] == '\0') ? "tables" : dir);
+  run_benchmark((directory == NULL || directory[0] == '\0') ? "tables"
+                                                             : directory);
   printf("Press Enter to return to the TUI...");
   fflush(stdout);
-  int ch = 0;
-  while ((ch = getchar()) != '\n' && ch != EOF) {
+  int key = 0;
+  while ((key = getchar()) != '\n' && key != EOF) {
   }
   reset_prog_mode();
   refresh();
@@ -126,27 +134,26 @@ void start_grid_tui(Grid *grid) {
 
   draw_tui(*grid, message, x, y);
 
-  int ch;
-  while ((ch = getch()) != 'q' && ch != '\n') {
-    if (ch == KEY_UP) {
+  int key;
+  while ((key = getch()) != 'q' && key != '\n') {
+    if (key == KEY_UP) {
       if (y > 1)
         y--;
-    } else if (ch == KEY_DOWN) {
-      if (y < NUMBER_OF_POSSIBLE)
+    } else if (key == KEY_DOWN) {
+      if (y < CANDIDATE_COUNT)
         y++;
-    } else if (ch == KEY_LEFT) {
+    } else if (key == KEY_LEFT) {
       if (x > 1)
         x--;
-    } else if (ch == KEY_RIGHT) {
-      if (x < NUMBER_OF_POSSIBLE)
+    } else if (key == KEY_RIGHT) {
+      if (x < CANDIDATE_COUNT)
         x++;
-    } else if (ch == '?') {
+    } else if (key == '?') {
       set_grid_value_xy(*grid, x, y, 0, 0);
       set_tui_message(message, sizeof(message), "");
-    } else if (ch == 's') {
-      solve(*grid);
-      set_tui_message(message, sizeof(message), "Grid solved");
-    } else if (ch == 'l') {
+    } else if (key == 's') {
+      solve_tui_grid(*grid, message, sizeof(message));
+    } else if (key == 'l') {
       char path[TUI_INPUT_SIZE];
       if (read_tui_line("Load file: ", path, sizeof(path))) {
         if (load_tui_grid(grid, path))
@@ -154,7 +161,7 @@ void start_grid_tui(Grid *grid) {
         else
           set_tui_message(message, sizeof(message), "Could not load grid");
       }
-    } else if (ch == 'g') {
+    } else if (key == 'g') {
       char level[TUI_INPUT_SIZE];
       char seedText[TUI_INPUT_SIZE];
       Difficulty difficulty;
@@ -173,19 +180,20 @@ void start_grid_tui(Grid *grid) {
       } else {
         set_tui_message(message, sizeof(message), "Invalid difficulty or seed");
       }
-    } else if (ch == 'w') {
+    } else if (key == 'w') {
       char path[TUI_INPUT_SIZE];
       if (read_tui_line("Write to file: ", path, sizeof(path)))
         save_tui_grid(*grid, path, message, sizeof(message));
-    } else if (ch == 'b') {
-      char dir[TUI_INPUT_SIZE] = "";
-      read_tui_line("Benchmark dir (empty = tables): ", dir, sizeof(dir));
-      run_tui_benchmark(dir);
+    } else if (key == 'b') {
+      char directory[TUI_INPUT_SIZE] = "";
+      read_tui_line("Benchmark directory (empty = tables): ", directory,
+                    sizeof(directory));
+      run_tui_benchmark(directory);
       set_tui_message(message, sizeof(message), "Benchmark finished");
-    } else if (isdigit(ch)) {
-      ch -= '0';
-      if (ch > 0 && ch <= 9) {
-        set_grid_value_xy(*grid, x, y, ch, 0);
+    } else if (key >= '0' && key <= '9') {
+      key -= '0';
+      if (key > 0 && key <= 9) {
+        set_grid_value_xy(*grid, x, y, key, 0);
         set_tui_message(message, sizeof(message), "");
       }
     }

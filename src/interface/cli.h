@@ -1,6 +1,6 @@
 #ifndef CLI_H
 #define CLI_H
 
-int cli_run(int argc, char **argv);
+int run_cli(int argc, char **argv);
 
 #endif /* CLI_H */

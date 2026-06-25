@@ -1,21 +1,18 @@
 #ifndef TYPE_HISTORY_H
 #define TYPE_HISTORY_H
 
-#include "type_sudokutile.h"
+#include "type_grid.h"
 
-#define GRID_SIZE 81
-#define GRID_SIDE 9
-
-typedef struct Affectation {
-  SudokuTile *tile;
-  char supposed;
+typedef struct SolverStep {
+  SudokuCell *cell;
+  char isGuess;
   char value;
-  char grid_values[GRID_SIZE];
-  char grid_possibles[GRID_SIZE][GRID_SIDE];
-} Affectation;
+  char gridValues[GRID_CELL_COUNT];
+  char gridCandidates[GRID_CELL_COUNT][GRID_SIDE];
+} SolverStep;
 
-extern Affectation history[81];
-extern int history_index;
-extern int deduction_count;
+extern SolverStep solverHistory[GRID_CELL_COUNT];
+extern int historyIndex;
+extern int deductionCount;
 
 #endif /* TYPE_HISTORY_H */

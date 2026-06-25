@@ -33,9 +33,9 @@ set(SUDOKU_SOURCES
         src/grid/grid.c
         src/grid/grid.h
         src/grid/grid_internal.h
-        src/grid/tile.c
-        src/grid/tile.h
-        src/grid/tile_internal.h
+        src/grid/cell.c
+        src/grid/cell.h
+        src/grid/cell_internal.h
         src/generator/generator.c
         src/generator/generator.h
         src/generator/generator_internal.h
@@ -75,7 +75,7 @@ if(BUILD_TESTING)
                         tests/test_runner.c
                         tests/test_suites.h
                         tests/test_grid.c
-                        tests/test_tile.c
+                        tests/test_cell.c
                         tests/test_subset.c
                         tests/test_solver.c
                         tests/test_io.c

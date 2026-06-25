@@ -2,17 +2,17 @@
 #define TYPE_DIFFICULTY_H
 
 typedef struct DifficultyTarget {
-  int min_removed;
-  int max_removed;
-  int min_suppositions;
-  int max_suppositions;
+  int minRemoved;
+  int maxRemoved;
+  int minGuesses;
+  int maxGuesses;
 } DifficultyTarget;
 
 typedef enum Difficulty {
   TRIVIAL,
   BASIC,
   INTERMEDIATE,
-  DIFFICILE,
+  DIFFICULT,
   EXPERT
 } Difficulty;
 

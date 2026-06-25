@@ -16,6 +16,8 @@
 #include "tui.h"
 
 #include <dirent.h>
+#include <errno.h>
+#include <limits.h>
 #include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,24 +27,24 @@
 typedef struct CliOptions {
   Difficulty difficulty;
   unsigned int seed;
-  char *load_file;
-  char *write_filepath;
-  const char *benchmark_dir;
+  char *loadFile;
+  char *writeFilePath;
+  const char *benchmarkDirectory;
   char verbose;
   char interactive;
   char benchmark;
   char help;
-  char has_difficulty;
-  char has_seed;
+  char hasDifficulty;
+  char hasSeed;
 } CliOptions;
 
-SCREEN *cli_start_curses(void);
-void cli_end_curses(SCREEN *screen, CliOptions *options);
+SCREEN *start_cli_curses(void);
+void end_cli_curses(SCREEN *screen, CliOptions *options);
 char *make_table_path(const char *path);
 void free_options(CliOptions *options);
 int parse_options(int argc, char **argv, CliOptions *options);
-int cmp_strings(const void *a, const void *b);
-int benchmark_one(const char *dir, const char *fname);
+int compare_strings(const void *left, const void *right);
+int benchmark_one(const char *directory, const char *fileName);
 void solve_and_show(Grid grid, char verbose);
 Grid prepare_grid(const CliOptions *options);
 int run_grid_mode(CliOptions *options);

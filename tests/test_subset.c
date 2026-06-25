@@ -2,90 +2,90 @@
 #include "../src/subset/subset.h"
 #include <CUnit/CUnit.h>
 
-static SudokuTile *cell(Grid g, int row, int col) {
-  return &g->allTiles[row * 9 + col];
+static SudokuCell *get_test_cell(Grid grid, int row, int column) {
+  return &grid->cells[row * 9 + column];
 }
 
-static void test_line_subset(void) {
-  Grid g = create_grid();
-  Subset s = get_line_subset(g, 2);
-  CU_ASSERT_PTR_NOT_NULL_FATAL(s);
-  for (int c = 0; c < 9; c++)
-    CU_ASSERT_PTR_EQUAL(s[c], cell(g, 2, c));
-  delete_subset(s);
-  delete_grid(g);
+static void test_row_subset(void) {
+  Grid grid = create_grid();
+  Subset subset = get_row_subset(grid, 2);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(subset);
+  for (int column = 0; column < 9; column++)
+    CU_ASSERT_PTR_EQUAL(subset[column], get_test_cell(grid, 2, column));
+  delete_subset(subset);
+  delete_grid(grid);
 }
 
-static void test_col_subset(void) {
-  Grid g = create_grid();
-  Subset s = get_col_subset(g, 5);
-  CU_ASSERT_PTR_NOT_NULL_FATAL(s);
-  for (int r = 0; r < 9; r++)
-    CU_ASSERT_PTR_EQUAL(s[r], cell(g, r, 5));
-  delete_subset(s);
-  delete_grid(g);
+static void test_column_subset(void) {
+  Grid grid = create_grid();
+  Subset subset = get_column_subset(grid, 5);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(subset);
+  for (int row = 0; row < 9; row++)
+    CU_ASSERT_PTR_EQUAL(subset[row], get_test_cell(grid, row, 5));
+  delete_subset(subset);
+  delete_grid(grid);
 }
 
-static void test_subsq_subset_numbering(void) {
-  Grid g = create_grid();
+static void test_box_subset_numbering(void) {
+  Grid grid = create_grid();
 
-  Subset s = get_subsq_subset(g, 4);
-  CU_ASSERT_PTR_NOT_NULL_FATAL(s);
-  CU_ASSERT_PTR_EQUAL(s[0], cell(g, 3, 3));
-  CU_ASSERT_PTR_EQUAL(s[8], cell(g, 5, 5));
-  delete_subset(s);
+  Subset subset = get_box_subset(grid, 4);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(subset);
+  CU_ASSERT_PTR_EQUAL(subset[0], get_test_cell(grid, 3, 3));
+  CU_ASSERT_PTR_EQUAL(subset[8], get_test_cell(grid, 5, 5));
+  delete_subset(subset);
 
-  s = get_subsq_subset(g, 2);
-  CU_ASSERT_PTR_EQUAL(s[0], cell(g, 0, 6));
-  CU_ASSERT_PTR_EQUAL(s[8], cell(g, 2, 8));
-  delete_subset(s);
-  delete_grid(g);
+  subset = get_box_subset(grid, 2);
+  CU_ASSERT_PTR_EQUAL(subset[0], get_test_cell(grid, 0, 6));
+  CU_ASSERT_PTR_EQUAL(subset[8], get_test_cell(grid, 2, 8));
+  delete_subset(subset);
+  delete_grid(grid);
 }
 
 static void test_build_all_subsets_covers_grid(void) {
-  Grid g = create_grid();
+  Grid grid = create_grid();
 
-  CU_ASSERT_EQUAL(build_all_subsets(g), 0);
+  CU_ASSERT_EQUAL(build_all_subsets(grid), 0);
   for (int i = 0; i < SUBSET_COUNT; i++)
-    CU_ASSERT_PTR_NOT_NULL(g->allSubsets.subsets[i]);
-  delete_grid(g);
+    CU_ASSERT_PTR_NOT_NULL(grid->subsets.items[i]);
+  delete_grid(grid);
 }
 
 static void test_out_of_range_returns_null(void) {
-  Grid g = create_grid();
-  CU_ASSERT_PTR_NULL(get_line_subset(g, -1));
-  CU_ASSERT_PTR_NULL(get_line_subset(g, 9));
-  CU_ASSERT_PTR_NULL(get_line_subset(NULL, 0));
-  CU_ASSERT_PTR_NULL(get_col_subset(g, -1));
-  CU_ASSERT_PTR_NULL(get_col_subset(g, 9));
-  CU_ASSERT_PTR_NULL(get_col_subset(NULL, 0));
-  CU_ASSERT_PTR_NULL(get_subsq_subset(g, -1));
-  CU_ASSERT_PTR_NULL(get_subsq_subset(g, 9));
-  CU_ASSERT_PTR_NULL(get_subsq_subset(NULL, 0));
+  Grid grid = create_grid();
+  CU_ASSERT_PTR_NULL(get_row_subset(grid, -1));
+  CU_ASSERT_PTR_NULL(get_row_subset(grid, 9));
+  CU_ASSERT_PTR_NULL(get_row_subset(NULL, 0));
+  CU_ASSERT_PTR_NULL(get_column_subset(grid, -1));
+  CU_ASSERT_PTR_NULL(get_column_subset(grid, 9));
+  CU_ASSERT_PTR_NULL(get_column_subset(NULL, 0));
+  CU_ASSERT_PTR_NULL(get_box_subset(grid, -1));
+  CU_ASSERT_PTR_NULL(get_box_subset(grid, 9));
+  CU_ASSERT_PTR_NULL(get_box_subset(NULL, 0));
   delete_subset(NULL);
-  delete_grid(g);
+  delete_grid(grid);
 }
 
 static void test_build_and_free_all_subsets_errors(void) {
   CU_ASSERT_EQUAL(build_all_subsets(NULL), 1);
   free_all_subsets(NULL);
 
-  Grid g = create_grid();
-  CU_ASSERT_PTR_NOT_NULL_FATAL(g);
-  free_all_subsets(&g->allSubsets);
+  Grid grid = create_grid();
+  CU_ASSERT_PTR_NOT_NULL_FATAL(grid);
+  free_all_subsets(&grid->subsets);
   for (int i = 0; i < SUBSET_COUNT; i++)
-    CU_ASSERT_PTR_NULL(g->allSubsets.subsets[i]);
-  CU_ASSERT_EQUAL(build_all_subsets(g), 0);
-  delete_grid(g);
+    CU_ASSERT_PTR_NULL(grid->subsets.items[i]);
+  CU_ASSERT_EQUAL(build_all_subsets(grid), 0);
+  delete_grid(grid);
 }
 
 int register_subset_tests(void) {
   CU_pSuite suite = CU_add_suite("subset", NULL, NULL);
   if (suite == NULL)
     return 1;
-  if (CU_add_test(suite, "line subset", test_line_subset) == NULL ||
-      CU_add_test(suite, "col subset", test_col_subset) == NULL ||
-      CU_add_test(suite, "box numbering", test_subsq_subset_numbering) ==
+  if (CU_add_test(suite, "row subset", test_row_subset) == NULL ||
+      CU_add_test(suite, "column subset", test_column_subset) == NULL ||
+      CU_add_test(suite, "box numbering", test_box_subset_numbering) ==
           NULL ||
       CU_add_test(suite, "build all subsets",
                   test_build_all_subsets_covers_grid) == NULL ||
