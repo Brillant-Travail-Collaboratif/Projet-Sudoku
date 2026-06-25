@@ -38,6 +38,16 @@ static void test_parse_generate_and_seed_flags(void) {
   free_options(&options);
 }
 
+static void test_parse_generates_default_seed(void) {
+  CliOptions options;
+  char *argv[] = {"sudoku"};
+
+  CU_ASSERT_TRUE(parse_options(1, argv, &options));
+  CU_ASSERT_NOT_EQUAL(options.seed, 0u);
+  CU_ASSERT_FALSE(options.hasSeed);
+  free_options(&options);
+}
+
 static void test_parse_write_flag(void) {
   CliOptions options;
   char *argv[] = {"sudoku", "-write", "/tmp/sudoku_cli_out.txt"};
@@ -96,8 +106,8 @@ static void test_parse_rejects_invalid_mode_combinations(void) {
   CliOptions options;
   char *benchmarkGenerate[] = {"sudoku", "-benchmark", "-generate", "basic"};
   char *benchmarkWrite[] = {"sudoku", "-benchmark", "-write", "out.txt"};
-  char *loadGenerate[] = {"sudoku", "-load", "trivial_table_1.txt",
-                           "-generate", "basic"};
+  char *loadGenerate[] = {"sudoku", "-load", "trivial_table_1.txt", "-generate",
+                          "basic"};
   char *loadSeed[] = {"sudoku", "-load", "trivial_table_1.txt", "-seed", "7"};
 
   CU_ASSERT_FALSE(parse_options(4, benchmarkGenerate, &options));
@@ -136,11 +146,13 @@ int register_cli_tests(void) {
     return 1;
   if (CU_add_test(suite, "help", test_cli_help_returns_success) == NULL ||
       CU_add_test(suite, "bad argument", test_cli_rejects_bad_argument) ==
-      NULL ||
+          NULL ||
       CU_add_test(suite, "bad benchmark directory",
                   test_cli_rejects_bad_benchmark_dir) == NULL ||
       CU_add_test(suite, "parse generate and seed flags",
                   test_parse_generate_and_seed_flags) == NULL ||
+      CU_add_test(suite, "parse generates default seed",
+                  test_parse_generates_default_seed) == NULL ||
       CU_add_test(suite, "parse write flag", test_parse_write_flag) == NULL ||
       CU_add_test(suite, "parse load allows verbose and interactive",
                   test_parse_load_allows_verbose_and_interactive) == NULL ||
