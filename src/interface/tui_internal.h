@@ -28,6 +28,6 @@ char load_tui_grid(Grid *grid, const char *path);
 char generate_tui_grid(Grid *grid, Difficulty difficulty, unsigned int seed);
 char solve_tui_grid(Grid grid, char *message, size_t size);
 void save_tui_grid(Grid grid, const char *path, char *message, size_t size);
-void run_tui_benchmark(const char *dir);
+void run_tui_benchmark(const char *directory);
 
 #endif /* TUI_INTERNAL_H */

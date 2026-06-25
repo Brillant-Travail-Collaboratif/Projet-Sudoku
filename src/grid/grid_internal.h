@@ -3,7 +3,7 @@
 
 #include "../subset/subset.h"
 #include "grid.h"
-#include "tile.h"
+#include "cell.h"
 #include <stdlib.h>
 
 #endif /* GRID_INTERNAL_H */

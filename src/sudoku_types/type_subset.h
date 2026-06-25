@@ -2,13 +2,15 @@
 #define TYPE_SUBSET_H
 
 #define SUBSET_COUNT 27
+#define CELLS_PER_UNIT 9
+#define BOX_SIDE 3
 
-#include "type_sudokutile.h"
+#include "type_sudoku_cell.h"
 
-typedef SudokuTile **Subset;
+typedef SudokuCell **Subset;
 
 typedef struct {
-  Subset subsets[SUBSET_COUNT];
-} AllSubsets;
+  Subset items[SUBSET_COUNT];
+} SubsetCollection;
 
 #endif /* TYPE_SUBSET_H */

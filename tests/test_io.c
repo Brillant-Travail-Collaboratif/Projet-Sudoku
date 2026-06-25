@@ -3,18 +3,18 @@
 #include <CUnit/CUnit.h>
 #include <stdio.h>
 
-static const char *k_tmp = "/tmp/sudoku_io_test.txt";
+static const char *TEST_FILE_PATH = "/tmp/sudoku_io_test.txt";
 
 static void write_file(const char *path, const char *content) {
-    FILE *f = fopen(path, "w");
-    CU_ASSERT_PTR_NOT_NULL_FATAL(f);
-    fputs(content, f);
-    fclose(f);
+    FILE *file = fopen(path, "w");
+    CU_ASSERT_PTR_NOT_NULL_FATAL(file);
+    fputs(content, file);
+    fclose(file);
 }
 
 static void test_load_valid(void) {
-    history_index = 0;
-    write_file(k_tmp, "5 3 ? ? 7 ? ? ? ?\n"
+    historyIndex = 0;
+    write_file(TEST_FILE_PATH, "5 3 ? ? 7 ? ? ? ?\n"
                       "6 ? ? 1 9 5 ? ? ?\n"
                       "? 9 8 ? ? ? ? 6 ?\n"
                       "8 ? ? ? 6 ? ? ? 3\n"
@@ -23,19 +23,19 @@ static void test_load_valid(void) {
                       "? 6 ? ? ? ? 2 8 ?\n"
                       "? ? ? 4 1 9 ? ? 5\n"
                       "? ? ? ? 8 ? ? 7 9\n");
-    Grid g = load_grid_from_file(k_tmp);
-    CU_ASSERT_PTR_NOT_NULL_FATAL(g);
-    CU_ASSERT_EQUAL(get_grid_value_xy(g, 1, 1), 5);
-    CU_ASSERT_EQUAL(get_grid_value_xy(g, 2, 1), 3);
-    CU_ASSERT_EQUAL(get_grid_value_xy(g, 5, 1), 7);
-    CU_ASSERT_EQUAL(get_grid_value_xy(g, 3, 1), 0); /* a '?' */
-    CU_ASSERT_EQUAL(grid_filled_count(g), 30);
-    CU_ASSERT_EQUAL(history_index, 0);
-    delete_grid(g);
+    Grid grid = load_grid_from_file(TEST_FILE_PATH);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(grid);
+    CU_ASSERT_EQUAL(get_grid_value_xy(grid, 1, 1), 5);
+    CU_ASSERT_EQUAL(get_grid_value_xy(grid, 2, 1), 3);
+    CU_ASSERT_EQUAL(get_grid_value_xy(grid, 5, 1), 7);
+    CU_ASSERT_EQUAL(get_grid_value_xy(grid, 3, 1), 0); /* a '?' */
+    CU_ASSERT_EQUAL(count_filled_cells(grid), 30);
+    CU_ASSERT_EQUAL(historyIndex, 0);
+    delete_grid(grid);
 }
 
 static void test_save_roundtrip(void) {
-    write_file(k_tmp, "1 ? 3 ? 5 ? 7 ? 9\n"
+    write_file(TEST_FILE_PATH, "1 ? 3 ? 5 ? 7 ? 9\n"
                       "? ? ? ? ? ? ? ? ?\n"
                       "? ? ? ? ? ? ? ? ?\n"
                       "? ? ? ? ? ? ? ? ?\n"
@@ -44,20 +44,20 @@ static void test_save_roundtrip(void) {
                       "? ? ? ? ? ? ? ? ?\n"
                       "? ? ? ? ? ? ? ? ?\n"
                       "? ? ? ? ? ? ? ? ?\n");
-    Grid g = load_grid_from_file(k_tmp);
-    CU_ASSERT_PTR_NOT_NULL_FATAL(g);
+    Grid grid = load_grid_from_file(TEST_FILE_PATH);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(grid);
 
-    const char *out = "/tmp/sudoku_io_out.txt";
-    CU_ASSERT_EQUAL(write_grid_to_file(out, g), 0);
+    const char *outputPath = "/tmp/sudoku_io_out.txt";
+    CU_ASSERT_EQUAL(write_grid_to_file(outputPath, grid), 0);
 
-    Grid back = load_grid_from_file(out);
-    CU_ASSERT_PTR_NOT_NULL_FATAL(back);
+    Grid reloadedGrid = load_grid_from_file(outputPath);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(reloadedGrid);
     for (unsigned char y = 1; y <= 9; y++)
         for (unsigned char x = 1; x <= 9; x++)
-            CU_ASSERT_EQUAL(get_grid_value_xy(g, x, y),
-                            get_grid_value_xy(back, x, y));
-    delete_grid(back);
-    delete_grid(g);
+            CU_ASSERT_EQUAL(get_grid_value_xy(grid, x, y),
+                            get_grid_value_xy(reloadedGrid, x, y));
+    delete_grid(reloadedGrid);
+    delete_grid(grid);
 }
 
 static void test_missing_and_null(void) {
@@ -67,10 +67,10 @@ static void test_missing_and_null(void) {
 }
 
 static void test_malformed_and_save_errors(void) {
-    write_file(k_tmp, "1 ? 3\n");
-    CU_ASSERT_PTR_NULL(load_grid_from_file(k_tmp));
+    write_file(TEST_FILE_PATH, "1 ? 3\n");
+    CU_ASSERT_PTR_NULL(load_grid_from_file(TEST_FILE_PATH));
 
-    write_file(k_tmp, "? ? ? ? ? ? ? ? ?\n"
+    write_file(TEST_FILE_PATH, "? ? ? ? ? ? ? ? ?\n"
                       "? ? ? ? ? ? ? ? ?\n"
                       "? ? ? ? ? ? ? ? ?\n"
                       "? ? ? ? ? ? ? ? ?\n"
@@ -79,9 +79,9 @@ static void test_malformed_and_save_errors(void) {
                       "? ? ? ? ? ? ? ? ?\n"
                       "? ? ? ? ? ? ? ? ?\n"
                       "? ? ? ? ? ? ? ? ?\n");
-    CU_ASSERT_PTR_NULL(load_grid_from_file(k_tmp));
+    CU_ASSERT_PTR_NULL(load_grid_from_file(TEST_FILE_PATH));
 
-    write_file(k_tmp, "? ? ? ? ? ? ? ? ?\n"
+    write_file(TEST_FILE_PATH, "? ? ? ? ? ? ? ? ?\n"
                       "? ? ? ? ? ? ? ? ?\n"
                       "? ? ? ? ? ? ? ? ?\n"
                       "? ? ? ? ? ? ? ? ?\n"
@@ -91,14 +91,15 @@ static void test_malformed_and_save_errors(void) {
                       "? ? ? ? ? ? ? ? ?\n"
                       "? ? ? ? ? ? ? ? ?\n"
                       "1\n");
-    CU_ASSERT_PTR_NULL(load_grid_from_file(k_tmp));
+    CU_ASSERT_PTR_NULL(load_grid_from_file(TEST_FILE_PATH));
 
-    Grid g = create_grid();
-    CU_ASSERT_PTR_NOT_NULL_FATAL(g);
-    CU_ASSERT_EQUAL(write_grid_to_file(NULL, g), 1);
-    CU_ASSERT_EQUAL(write_grid_to_file("/tmp/sudoku_missing_dir/out.txt", g), 1);
-    CU_ASSERT_EQUAL(write_grid_to_file(k_tmp, NULL), 1);
-    delete_grid(g);
+    Grid grid = create_grid();
+    CU_ASSERT_PTR_NOT_NULL_FATAL(grid);
+    CU_ASSERT_EQUAL(write_grid_to_file(NULL, grid), 1);
+    CU_ASSERT_EQUAL(
+        write_grid_to_file("/tmp/sudoku_missing_dir/out.txt", grid), 1);
+    CU_ASSERT_EQUAL(write_grid_to_file(TEST_FILE_PATH, NULL), 1);
+    delete_grid(grid);
 }
 
 int register_io_tests(void) {

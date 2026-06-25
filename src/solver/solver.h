@@ -2,15 +2,15 @@
 #define SOLVER_H
 
 #include "../grid/grid.h"
-#include "../grid/tile.h"
+#include "../grid/cell.h"
 #include "../sudoku_types/type_history.h"
 #include "../sudoku_types/type_subset.h"
-#include "../sudoku_types/type_sudokutile.h"
+#include "../sudoku_types/type_sudoku_cell.h"
 
-extern Affectation history[GRID_SIZE];
+extern SolverStep solverHistory[GRID_CELL_COUNT];
 
 char is_grid_valid(Grid grid);
 char solve(Grid grid);
-char solve_with_stats(Grid grid, int *supposition_count);
+char solve_with_stats(Grid grid, int *guessCount);
 
 #endif /* SOLVER_H */

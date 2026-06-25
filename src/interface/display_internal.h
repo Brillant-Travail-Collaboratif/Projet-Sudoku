@@ -5,10 +5,8 @@
 #include <ncurses.h>
 #include <stdio.h>
 
-#define BOX_SIDE 3
-#define GRID_SIDE 9
 #define ROW_SEPARATOR_FINAL "+-------+-------+-------+\n"
-#define ROW_SEPARATOR_POSSIBLE "+-------------+-------------+-------------+\n"
+#define ROW_SEPARATOR_CANDIDATES "+-------------+-------------+-------------+\n"
 
 void display_values_curses(Grid grid);
 

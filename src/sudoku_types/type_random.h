@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-typedef struct GeneratorRandom {
+typedef struct RandomGenerator {
   uint32_t state;
-} GeneratorRandom;
+} RandomGenerator;
 
 #endif /* TYPE_RANDOM_H */

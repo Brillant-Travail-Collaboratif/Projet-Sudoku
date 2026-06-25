@@ -2,21 +2,22 @@
 
 char is_value_allowed(Grid grid, int index, char value) {
   int row = index / GRID_SIDE;
-  int col = index % GRID_SIDE;
-  int box_row = (row / 3) * 3;
-  int box_col = (col / 3) * 3;
+  int column = index % GRID_SIDE;
+  int boxRow = (row / 3) * 3;
+  int boxColumn = (column / 3) * 3;
 
-  for (int c = 0; c < GRID_SIDE; c++)
-    if (grid->allTiles[row * GRID_SIDE + c].value == value)
+  for (int currentColumn = 0; currentColumn < GRID_SIDE; currentColumn++)
+    if (grid->cells[row * GRID_SIDE + currentColumn].value == value)
       return 0;
 
-  for (int r = 0; r < GRID_SIDE; r++)
-    if (grid->allTiles[r * GRID_SIDE + col].value == value)
+  for (int currentRow = 0; currentRow < GRID_SIDE; currentRow++)
+    if (grid->cells[currentRow * GRID_SIDE + column].value == value)
       return 0;
 
-  for (int r = box_row; r < box_row + 3; r++)
-    for (int c = box_col; c < box_col + 3; c++)
-      if (grid->allTiles[r * GRID_SIDE + c].value == value)
+  for (int currentRow = boxRow; currentRow < boxRow + 3; currentRow++)
+    for (int currentColumn = boxColumn; currentColumn < boxColumn + 3;
+         currentColumn++)
+      if (grid->cells[currentRow * GRID_SIDE + currentColumn].value == value)
         return 0;
 
   return 1;
@@ -31,27 +32,27 @@ int collect_allowed_values(Grid grid, int index, char values[GRID_SIDE]) {
 }
 
 int find_best_empty_cell(Grid grid) {
-  int best_index = -1;
-  int best_count = GRID_SIDE + 1;
+  int bestIndex = -1;
+  int bestCount = GRID_SIDE + 1;
 
-  for (int i = 0; i < GRID_SIZE; i++) {
-    if (grid->allTiles[i].value != 0)
+  for (int i = 0; i < GRID_CELL_COUNT; i++) {
+    if (grid->cells[i].value != 0)
       continue;
 
     char values[GRID_SIDE];
     int count = collect_allowed_values(grid, i, values);
-    if (count < best_count) {
-      best_count = count;
-      best_index = i;
+    if (count < bestCount) {
+      bestCount = count;
+      bestIndex = i;
       if (count <= 1)
         break;
     }
   }
 
-  return best_index;
+  return bestIndex;
 }
 
-char fill_complete_grid(Grid grid, GeneratorRandom *random) {
+char fill_complete_grid(Grid grid, RandomGenerator *random) {
   int index = find_best_empty_cell(grid);
   if (index < 0)
     return is_grid_valid(grid);
@@ -61,123 +62,124 @@ char fill_complete_grid(Grid grid, GeneratorRandom *random) {
   int order[GRID_SIDE];
   for (int i = 0; i < count; i++)
     order[i] = i;
-  shuffle_ints(random, order, count);
+  shuffle_integers(random, order, count);
 
   for (int i = 0; i < count; i++) {
-    grid->allTiles[index].value = values[order[i]];
+    grid->cells[index].value = values[order[i]];
     reset_grid_candidates(grid);
     if (fill_complete_grid(grid, random))
       return 1;
-    grid->allTiles[index].value = 0;
+    grid->cells[index].value = 0;
     reset_grid_candidates(grid);
   }
 
   return 0;
 }
 
-char grids_have_same_values(Grid a, Grid b) {
-  if (a == NULL || b == NULL || a->allTiles == NULL || b->allTiles == NULL)
+char have_same_grid_values(Grid firstGrid, Grid secondGrid) {
+  if (firstGrid == NULL || secondGrid == NULL || firstGrid->cells == NULL ||
+      secondGrid->cells == NULL)
     return 0;
 
-  for (int i = 0; i < GRID_SIZE; i++)
-    if (a->allTiles[i].value != b->allTiles[i].value)
+  for (int i = 0; i < GRID_CELL_COUNT; i++)
+    if (firstGrid->cells[i].value != secondGrid->cells[i].value)
       return 0;
   return 1;
 }
 
-char solution_matches_completed_grid(Grid puzzle, Grid completed) {
+char does_solution_match_completed_grid(Grid puzzle, Grid completed) {
   Grid solved = clone_grid_values(puzzle);
   if (solved == NULL)
     return 0;
 
-  int suppositions = 0;
-  char ok = solve_with_stats(solved, &suppositions);
-  (void)suppositions;
-  ok = ok && grids_have_same_values(solved, completed);
+  int guesses = 0;
+  char ok = solve_with_stats(solved, &guesses);
+  (void)guesses;
+  ok = ok && have_same_grid_values(solved, completed);
   delete_grid(solved);
   return ok;
 }
 
-char count_solutions(Grid grid, int index, int *count, Grid first_solution) {
+char count_solutions(Grid grid, int index, int *count, Grid firstSolution) {
   if (*count > 1)
     return 1;
 
-  if (index == GRID_SIZE) {
+  if (index == GRID_CELL_COUNT) {
     (*count)++;
-    if (*count == 1 && first_solution != NULL) {
-      for (int i = 0; i < GRID_SIZE; i++)
-        first_solution->allTiles[i].value = grid->allTiles[i].value;
-      reset_grid_candidates(first_solution);
+    if (*count == 1 && firstSolution != NULL) {
+      for (int i = 0; i < GRID_CELL_COUNT; i++)
+        firstSolution->cells[i].value = grid->cells[i].value;
+      reset_grid_candidates(firstSolution);
     }
     return 1;
   }
 
-  if (grid->allTiles[index].value != 0)
-    return count_solutions(grid, index + 1, count, first_solution);
+  if (grid->cells[index].value != 0)
+    return count_solutions(grid, index + 1, count, firstSolution);
 
   char values[GRID_SIDE];
-  int value_count = collect_allowed_values(grid, index, values);
-  for (int i = 0; i < value_count; i++) {
-    grid->allTiles[index].value = values[i];
-    if (!count_solutions(grid, index + 1, count, first_solution))
+  int valueCount = collect_allowed_values(grid, index, values);
+  for (int i = 0; i < valueCount; i++) {
+    grid->cells[index].value = values[i];
+    if (!count_solutions(grid, index + 1, count, firstSolution))
       return 0;
     if (*count > 1)
       break;
   }
-  grid->allTiles[index].value = 0;
+  grid->cells[index].value = 0;
   return 1;
 }
 
 char has_unique_matching_solution(Grid puzzle, Grid completed) {
   Grid check = clone_grid_values(puzzle);
-  Grid first_solution = create_grid();
+  Grid firstSolution = create_grid();
   int solutions = 0;
   char ok = 0;
 
-  if (check != NULL && first_solution != NULL && is_grid_valid(check) &&
-      count_solutions(check, 0, &solutions, first_solution)) {
-    ok = solutions == 1 && grids_have_same_values(first_solution, completed) &&
-         solution_matches_completed_grid(puzzle, completed);
+  if (check != NULL && firstSolution != NULL && is_grid_valid(check) &&
+      count_solutions(check, 0, &solutions, firstSolution)) {
+    ok = solutions == 1 && have_same_grid_values(firstSolution, completed) &&
+         does_solution_match_completed_grid(puzzle, completed);
   }
 
-  delete_grid(first_solution);
+  delete_grid(firstSolution);
   delete_grid(check);
   return ok;
 }
 
-int target_removed_count(Difficulty difficulty, GeneratorRandom *random) {
-  if (difficulty == DIFFICILE)
-    return 50 + generator_random_int(random, 15);
+int choose_removed_cell_target(Difficulty difficulty, RandomGenerator *random) {
+  if (difficulty == DIFFICULT)
+    return 50 + generate_random_int(random, 15);
   if (difficulty == EXPERT)
-    return 58 + generator_random_int(random, 13);
+    return 58 + generate_random_int(random, 13);
 
-  DifficultyTarget target = target_for_difficulty(difficulty);
-  int span = target.max_removed - target.min_removed + 1;
-  return target.min_removed + generator_random_int(random, span);
+  DifficultyTarget target = get_difficulty_target(difficulty);
+  int span = target.maxRemoved - target.minRemoved + 1;
+  return target.minRemoved + generate_random_int(random, span);
 }
 
 Grid build_candidate_puzzle(Grid completed, Difficulty difficulty,
-                            GeneratorRandom *random) {
+                            RandomGenerator *random) {
   Grid puzzle = clone_grid_values(completed);
   if (puzzle == NULL)
     return NULL;
 
-  int target = target_removed_count(difficulty, random);
-  int order[GRID_SIZE];
-  for (int i = 0; i < GRID_SIZE; i++)
+  int target = choose_removed_cell_target(difficulty, random);
+  int order[GRID_CELL_COUNT];
+  for (int i = 0; i < GRID_CELL_COUNT; i++)
     order[i] = i;
-  shuffle_ints(random, order, GRID_SIZE);
+  shuffle_integers(random, order, GRID_CELL_COUNT);
 
-  for (int i = 0; i < GRID_SIZE && removed_count(puzzle) < target; i++) {
+  for (int i = 0; i < GRID_CELL_COUNT && count_removed_cells(puzzle) < target; i++) {
     int index = order[i];
-    char old_value = puzzle->allTiles[index].value;
-    if (old_value == 0)
+    char oldValue = puzzle->cells[index].value;
+    if (oldValue == 0)
       continue;
 
-    puzzle->allTiles[index].value = 0;
+    puzzle->cells[index].value = 0;
     reset_grid_candidates(puzzle);
     if (!has_unique_matching_solution(puzzle, completed)) {
-      puzzle->allTiles[index].value = old_value;
+      puzzle->cells[index].value = oldValue;
       reset_grid_candidates(puzzle);
     }
   }
@@ -191,7 +193,7 @@ Grid build_candidate_puzzle(Grid completed, Difficulty difficulty,
 }
 
 Grid generate_sudoku(Difficulty difficulty, unsigned int seed) {
-  GeneratorRandom random = {seed == 0 ? 1u : seed};
+  RandomGenerator random = {seed == 0 ? 1u : seed};
 
   for (int attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt++) {
     Grid completed = create_grid();

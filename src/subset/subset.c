@@ -5,32 +5,34 @@
 #include "subset_internal.h"
 
 Subset allocate_subset(void) {
-  return malloc(sizeof(SudokuTile *) * SUBSET_SIZE);
+  return malloc(sizeof(SudokuCell *) * CELLS_PER_UNIT);
 }
-Subset get_line_subset(Grid grid, int n) {
-  if (grid == NULL || grid->allTiles == NULL || n < 0 || n >= SUBSET_SIZE)
+Subset get_row_subset(Grid grid, int rowIndex) {
+  if (grid == NULL || grid->cells == NULL || rowIndex < 0 ||
+      rowIndex >= CELLS_PER_UNIT)
     return NULL;
 
   Subset subset = allocate_subset();
   if (subset == NULL)
     return NULL;
 
-  for (int k = 0; k < SUBSET_SIZE; k++)
-    subset[k] = &grid->allTiles[n * SUBSET_SIZE + k];
+  for (int k = 0; k < CELLS_PER_UNIT; k++)
+    subset[k] = &grid->cells[rowIndex * CELLS_PER_UNIT + k];
 
   return subset;
 }
 
-Subset get_col_subset(Grid grid, int n) {
-  if (grid == NULL || grid->allTiles == NULL || n < 0 || n >= SUBSET_SIZE)
+Subset get_column_subset(Grid grid, int columnIndex) {
+  if (grid == NULL || grid->cells == NULL || columnIndex < 0 ||
+      columnIndex >= CELLS_PER_UNIT)
     return NULL;
 
   Subset subset = allocate_subset();
   if (subset == NULL)
     return NULL;
 
-  for (int k = 0; k < SUBSET_SIZE; k++)
-    subset[k] = &grid->allTiles[k * SUBSET_SIZE + n];
+  for (int k = 0; k < CELLS_PER_UNIT; k++)
+    subset[k] = &grid->cells[k * CELLS_PER_UNIT + columnIndex];
 
   return subset;
 }
@@ -40,55 +42,55 @@ void delete_subset(Subset subset) {
     free(subset);
 }
 
-Subset get_subsq_subset(Grid grid, int n) {
-  if (grid == NULL || grid->allTiles == NULL || n < 0 || n >= SUBSET_SIZE)
+Subset get_box_subset(Grid grid, int boxIndex) {
+  if (grid == NULL || grid->cells == NULL || boxIndex < 0 ||
+      boxIndex >= CELLS_PER_UNIT)
     return NULL;
 
   Subset subset = allocate_subset();
   if (subset == NULL)
     return NULL;
 
-  /* Position du coin haut-gauche du sous-carre n. */
-  unsigned char boxRow = (n / BOX_SIDE) * BOX_SIDE; /* 0, 3 ou 6 */
-  unsigned char boxCol = (n % BOX_SIDE) * BOX_SIDE; /* 0, 3 ou 6 */
+  unsigned char boxRow = (boxIndex / BOX_SIDE) * BOX_SIDE;
+  unsigned char boxColumn = (boxIndex % BOX_SIDE) * BOX_SIDE;
 
-  /* Parcours en ligne puis en colonne dans le sous-carre. */
+  /* Traverse the box by row, then column. */
   for (unsigned char i = 0; i < BOX_SIDE; i++) {
     for (unsigned char j = 0; j < BOX_SIDE; j++) {
       unsigned char row = boxRow + i;
-      unsigned char col = boxCol + j;
-      subset[i * BOX_SIDE + j] = &grid->allTiles[row * SUBSET_SIZE + col];
+      unsigned char column = boxColumn + j;
+      subset[i * BOX_SIDE + j] = &grid->cells[row * CELLS_PER_UNIT + column];
     }
   }
 
   return subset;
 }
 
-void free_all_subsets(AllSubsets *all) {
-  if (all == NULL)
+void free_all_subsets(SubsetCollection *subsets) {
+  if (subsets == NULL)
     return;
   for (int i = 0; i < SUBSET_COUNT; i++) {
-    delete_subset(all->subsets[i]);
-    all->subsets[i] = NULL;
+    delete_subset(subsets->items[i]);
+    subsets->items[i] = NULL;
   }
 }
 
 char build_all_subsets(Grid grid) {
-  if (grid == NULL || grid->allTiles == NULL)
+  if (grid == NULL || grid->cells == NULL)
     return 1;
 
-  AllSubsets *all = &grid->allSubsets;
-  free_all_subsets(all);
+  SubsetCollection *subsets = &grid->subsets;
+  free_all_subsets(subsets);
 
-  for (int n = 0; n < SUBSET_SIZE; n++) {
-    all->subsets[n] = get_line_subset(grid, n);       /*  0..8  : lignes      */
-    all->subsets[9 + n] = get_col_subset(grid, n);    /*  9..17 : colonnes    */
-    all->subsets[18 + n] = get_subsq_subset(grid, n); /* 18..26 : sous-carres */
+  for (int unitIndex = 0; unitIndex < CELLS_PER_UNIT; unitIndex++) {
+    subsets->items[unitIndex] = get_row_subset(grid, unitIndex);
+    subsets->items[9 + unitIndex] = get_column_subset(grid, unitIndex);
+    subsets->items[18 + unitIndex] = get_box_subset(grid, unitIndex);
   }
 
   for (int i = 0; i < SUBSET_COUNT; i++) {
-    if (all->subsets[i] == NULL) {
-      free_all_subsets(all);
+    if (subsets->items[i] == NULL) {
+      free_all_subsets(subsets);
       return 1;
     }
   }

@@ -1,10 +1,10 @@
 #include "grid_file.h"
 
-Grid load_grid_from_file(const char *filename) {
-  if (filename == NULL)
+Grid load_grid_from_file(const char *fileName) {
+  if (fileName == NULL)
     return NULL;
 
-  FILE *file = fopen(filename, "r");
+  FILE *file = fopen(fileName, "r");
   if (file == NULL)
     return NULL;
 
@@ -44,10 +44,10 @@ Grid load_grid_from_file(const char *filename) {
   return grid;
 }
 
-int write_grid_to_file(const char *filename, Grid grid) {
-  if ((filename == NULL) || (grid == NULL))
+int write_grid_to_file(const char *fileName, Grid grid) {
+  if ((fileName == NULL) || (grid == NULL))
     return 1;
-  FILE *file = fopen(filename, "w");
+  FILE *file = fopen(fileName, "w");
   if (file == NULL)
     return 1;
   for (unsigned char row = 0; row < 9; row++) {

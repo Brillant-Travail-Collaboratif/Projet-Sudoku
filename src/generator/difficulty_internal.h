@@ -7,8 +7,8 @@
 #include <limits.h>
 #include <string.h>
 
-#define MAX_REMOVED_FOR_GUESSED_LEVELS 70
+#define MAX_REMOVED_FOR_GUESS_LEVELS 70
 
-char measure_difficulty(Grid puzzle, int *suppositions);
+char measure_difficulty(Grid puzzle, int *guesses);
 
 #endif /* DIFFICULTY_INTERNAL_H */
