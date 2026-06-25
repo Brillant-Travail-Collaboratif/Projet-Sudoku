@@ -51,6 +51,20 @@ int compare_strings(const void *left, const void *right) {
   return strcmp(*(const char *const *)left, *(const char *const *)right);
 }
 
+static unsigned int generate_default_seed(void) {
+  static char initialized = 0;
+
+  if (!initialized) {
+    srand((unsigned int)time(NULL));
+    initialized = 1;
+  }
+
+  unsigned int seed = 0;
+  while (seed == 0)
+    seed = (unsigned int)rand();
+  return seed;
+}
+
 void solve_and_show(Grid grid, char verbose) {
   display_values(grid);
 
@@ -107,8 +121,7 @@ int run_grid_mode(CliOptions *options) {
 
   if (options->writeFilePath != NULL) {
     if (write_grid_to_file(options->writeFilePath, grid)) {
-      fprintf(stderr, "Could not write grid to '%s'\n",
-              options->writeFilePath);
+      fprintf(stderr, "Could not write grid to '%s'\n", options->writeFilePath);
       delete_grid(grid);
       if (screen != NULL)
         end_cli_curses(screen, options);
@@ -131,13 +144,15 @@ void print_usage(void) {
       "  -v, -verbose              show solver statistics\n"
       "  -b, -benchmark [DIR]      solve every *.txt in DIR (default tables)\n"
       "  -g, -generate LEVEL       generate a LEVEL difficulty\n"
-      "  -s, -seed NUMBER          set a seed for the random number generator\n"
+      "  -s, -seed NUMBER          set a seed (default: random)\n"
       "  -w, -write FILE           write grid to file\n"
       "  -h, -help                 show this help\n");
 }
 
 int parse_options(int argc, char **argv, CliOptions *options) {
-  *options = (CliOptions){BASIC, 1u, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0};
+  *options = (CliOptions){
+      .difficulty = BASIC,
+  };
 
   for (int i = 1; i < argc; i++) {
     Difficulty parsed;
@@ -215,8 +230,7 @@ int parse_options(int argc, char **argv, CliOptions *options) {
 
   if (options->benchmark &&
       (options->interactive || options->loadFile != NULL ||
-       options->hasDifficulty || options->hasSeed ||
-       options->writeFilePath)) {
+       options->hasDifficulty || options->hasSeed || options->writeFilePath)) {
     fprintf(stderr,
             "Error: benchmark mode can only be combined with verbose mode\n");
     return 0;
@@ -228,6 +242,9 @@ int parse_options(int argc, char **argv, CliOptions *options) {
                     "interactive mode\n");
     return 0;
   }
+
+  if (!options->hasSeed)
+    options->seed = generate_default_seed();
 
   return 1;
 }
@@ -249,8 +266,8 @@ int benchmark_one(const char *directory, const char *fileName) {
       1000.0 * (double)(clock() - startTime) / CLOCKS_PER_SEC;
 
   printf("  %-28s %-5s  %8.2f ms  ded=%5d  guesses=%3d  filled=%2d/81\n",
-         fileName, solved ? "OK" : "STUCK", elapsedMilliseconds,
-         deductionCount, guesses, count_filled_cells(grid));
+         fileName, solved ? "OK" : "STUCK", elapsedMilliseconds, deductionCount,
+         guesses, count_filled_cells(grid));
 
   delete_grid(grid);
   return 0;
@@ -288,8 +305,8 @@ int run_benchmark(const char *directory) {
   qsort(fileNames, (size_t)fileCount, sizeof(fileNames[0]), compare_strings);
 
   printf("Benchmark on '%s' (%d grids)\n", directory, fileCount);
-  printf("  %-28s %-5s  %11s  %-9s  %-11s  %s\n", "grid", "state",
-         "time", "ded", "guesses", "filled");
+  printf("  %-28s %-5s  %11s  %-9s  %-11s  %s\n", "grid", "state", "time",
+         "ded", "guesses", "filled");
 
   clock_t totalStart = clock();
   for (int i = 0; i < fileCount; i++) {

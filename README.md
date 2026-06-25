@@ -87,14 +87,15 @@ Both the short and long forms of each parameter are supported:
 | `-h`, `-help` | Display the command help and exit. |
 | `-l FILE`, `-load FILE` | Load and solve a grid from `FILE`. A filename without a `/` is looked up in the bundled `tables/` directory; a path containing `/` is used as provided. |
 | `-g LEVEL`, `-generate LEVEL` | Generate and solve a grid. Accepted levels are `trivial`, `basic`, `intermediate`, `difficile` (or `difficult`), and `expert`. |
-| `-s NUMBER`, `-seed NUMBER` | Set the generation seed, making a generated puzzle reproducible. The default seed is `1`. |
+| `-s NUMBER`, `-seed NUMBER` | Set the generation seed, making a generated puzzle reproducible. By default, a seed is generated with the C standard random library. |
 | `-i`, `-interactive` | Open the ncurses interface to edit, load, generate, solve, benchmark, and save grids interactively. |
 | `-v`, `-verbose` | Print solver statistics, including the number of guesses and deductions. |
 | `-w FILE`, `-write FILE` | Write the resulting grid to `FILE` after solving or leaving the interactive interface. Empty cells are written as `?`. |
 | `-b [DIR]`, `-benchmark [DIR]` | Solve every `.txt` grid in `DIR` and report timing and solver statistics. The default directory is `tables/`. |
 
 Running the program without parameters generates and solves a `basic` grid
-with seed `1`:
+with an automatically generated seed. The selected seed is printed so it can
+be reused with `-seed`:
 
 ```sh
 ./Projet_Sudoku
